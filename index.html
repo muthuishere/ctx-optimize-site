@@ -132,7 +132,7 @@ a:hover{text-decoration:underline}
   </div>
 
   <div class="method"><b>Methodology — read this before quoting the numbers.</b>
-    graphify was timed on its <em>fastest</em> deterministic path (<code>update --no-cluster</code>: extraction only, no clustering, no LLM). ctx-optimize was timed on <code>add</code>, which does <em>more</em> work per run: extraction, graph build, stale-node pruning, and full wiki regeneration. Query latency is the median of 5 runs, same question, same 2,000-token budget, both CLIs invoked cold from the shell. Node counts are within a few percent of each other on shared corpora — both tools parsed the same code; on gin and on its own source graphify finds slightly more edges than we do, and we show that as-is. graphify also does things ctx-optimize deliberately does not: LLM-assisted community labeling and semantic clustering. If you want those, use graphify — the comparison here is the deterministic core both tools share.</div>
+    graphify was timed on its <em>fastest</em> deterministic path (<code>update --no-cluster</code>: extraction only, no clustering, no LLM). ctx-optimize was timed on <code>add</code>, which does <em>more</em> work per run: extraction, graph build, stale-node pruning, and full wiki regeneration. Query latency is the median of 5 runs, same question, same 2,000-token budget, both CLIs invoked cold from the shell. Node counts are shown for scale, not equivalence — the tools disagree about what counts as a node (ctx-optimize graphs import modules and markdown documents as first-class nodes; graphify includes some file types we skip), which is why ctx-optimize shows ~34% more nodes on flask while the 12k-file totals land within 1%. On gin and on its own source graphify finds slightly more nodes and edges than we do, and we show that as-is. graphify also does things ctx-optimize deliberately does not: LLM-assisted community labeling and semantic clustering. If you want those, use graphify — the comparison here is the deterministic core both tools share.</div>
 </section>
 
 <section class="wrap" id="design">
@@ -152,8 +152,8 @@ out:  no LLM API      the host agent answers; we serve context
 
 <section class="wrap" id="lineage">
   <h2>Lineage</h2>
-  <p class="sub" style="margin-bottom:12px">With all due respect to <a href="https://github.com/graphify-dev/graphify">graphify</a>.</p>
-  <p style="color:var(--muted);font-size:.95rem">ctx-optimize exists because of graphify, and openly builds on its best ideas — the fail-closed batch door, query budgets, the save-result/reflect feedback loop. The central store and the remote push/pull hook design were contributed <em>to</em> graphify by this project's author (graphify #1751 / #1752, git-verifiable) before this project existed. Where graphify reaches for an LLM — wiki generation, community naming — ctx-optimize stays deterministic and hands the intelligence back to the host agent. Different bet, shared respect.</p>
+  <p class="sub" style="margin-bottom:12px">With all due respect to <a href="https://github.com/Graphify-Labs/graphify">graphify</a>.</p>
+  <p style="color:var(--muted);font-size:.95rem">ctx-optimize exists because of graphify, and openly builds on its best ideas — the fail-closed batch door, query budgets, the save-result/reflect feedback loop. The central store and the remote push/pull hook design were contributed <em>to</em> graphify by this project's author — <a href="https://github.com/Graphify-Labs/graphify/issues/1751">issue #1751</a> and <a href="https://github.com/Graphify-Labs/graphify/pull/1752">PR #1752</a>, verifiable on GitHub — before this project existed. Where graphify reaches for an LLM — wiki generation, community naming — ctx-optimize stays deterministic and hands the intelligence back to the host agent. Different bet, shared respect.</p>
 </section>
 
 <section class="wrap" id="install">
