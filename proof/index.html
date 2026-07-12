@@ -92,6 +92,17 @@ li{margin:8px 0}
 <li><b>Cost today: +6% vs a no-store baseline</b> (v1 of the block: +11%; v2 "use it INSTEAD, cite directly, don't re-verify": +6%, turns −6%). Mechanism/architecture questions already win naturally (−13…25% cost); enumeration sweeps and body-constant questions lose — cards don't yet carry function bodies, so those reads still happen <em>on top</em>. That body-head card (in the original design, unbuilt) plus the three defects above are the fix list; we'll re-run this exact harness after and publish both runs.</li>
 </ul>
 
+<h2>Addendum 3 — the re-run: body-head cards clear the bar</h2>
+<p>Same day, same frozen harness, promise kept. The fix was the card the original design specified but v0 never built: <code>card</code> now returns the first ~30 lines of the symbol's <em>body</em> alongside signature/doc/callers, killing the follow-up read. Natural usage (skill + repo pointer, plain questions, zero steering), harness-billed dollars:</p>
+<div class="tbl"><table>
+<tr><th>run</th><th>total cost</th><th>vs baseline</th><th>turns</th><th>store calls</th></tr>
+<tr><td>baseline (no store)</td><td>$3.16</td><td>—</td><td>70</td><td>0</td></tr>
+<tr><td>pointer v1 · no-body cards</td><td>$3.50</td><td class="loss">+11%</td><td>71</td><td>55</td></tr>
+<tr><td>pointer v2 · no-body cards</td><td>$3.36</td><td class="loss">+6%</td><td>66</td><td>57</td></tr>
+<tr><td><b>pointer v2 · body-head cards</b></td><td class="win">$2.16</td><td class="win">−31.6%</td><td class="win">53</td><td>56</td></tr>
+</table></div>
+<p><b>The pre-committed 25% bar is cleared in the most honest configuration we know how to build.</b> Quality spot-verified on the cheapest runs — the $0.049 and $0.054 answers are complete, correct, straight-off-one-card, and again name the merge gatekeeper the grep arms kept getting wrong. Residuals stay published: 3 of 12 questions still cost more, and wall time is +31% (store calls run ~1–2s each at 275k nodes — latency is the next target). Trigger stack shipped as: generic skills (two standard dirs) + <code>init</code>-written repo pointer (CLAUDE.md/AGENTS.md) + one Claude Code UserPromptSubmit hook (the only supported CLI with a hook API); a hook-only one-shot with no repo files still used the store unprompted and answered correctly at baseline cost.</p>
+
 <h2>Raw data</h2>
 <ul>
 <li><a href="questions.json">questions.json</a> — the 12 questions with ground-truth keys</li>
