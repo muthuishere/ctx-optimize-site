@@ -173,6 +173,9 @@ td:first-child{font-family:var(--sans);color:var(--text)}
 .getit pre{margin-top:40px;background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:26px 30px;font-family:var(--mono);font-size:.9rem;line-height:2;overflow-x:auto;color:var(--muted)}
 .getit pre .c{color:var(--dim)}
 .getit pre .g{color:var(--accent)}
+.hero pre{margin-top:24px;max-width:560px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px 20px;font-family:var(--mono);font-size:.85rem;line-height:1.9;overflow-x:auto;color:var(--muted)}
+.hero pre .g{color:var(--accent)}
+.hero pre .c{color:var(--dim)}
 
 footer{border-top:1px solid var(--border);padding:44px 0;color:var(--dim);font-size:.86rem}
 footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
@@ -203,7 +206,6 @@ hr.sep{border:none;border-top:1px solid var(--border);max-width:1080px;margin:0 
     <li><a href="#demo">Demo</a></li>
     <li><a href="#numbers">Benchmarks</a></li>
     <li><a href="#proof">Kill test</a></li>
-    <li><a href="#lineage">Lineage</a></li>
   </ul>
 </div></nav>
 
@@ -554,12 +556,6 @@ ctx-optimize install --skills               <span class="c"># teach your coding 
   </div>
 </div></section>
 
-<section class="lineage" id="lineage"><div class="wrap">
-  <div class="sec-kicker">lineage</div>
-  <h2 class="sec">With all due respect to graphify.</h2>
-  <blockquote class="reveal">ctx-optimize exists because of <a href="https://github.com/Graphify-Labs/graphify">graphify</a>, and openly builds on its best ideas — the fail-closed batch door, query budgets, the save-result/reflect feedback loop. The central store and the remote push/pull hook design were contributed <b>to</b> graphify by this project's author — <a href="https://github.com/Graphify-Labs/graphify/issues/1751">issue #1751</a> and <a href="https://github.com/Graphify-Labs/graphify/pull/1752">PR #1752</a>, verifiable on GitHub — before this project existed. Where graphify reaches for an LLM — wiki generation, community naming — ctx-optimize stays deterministic and hands the intelligence back to the host agent. <b>Different bet, shared respect.</b></blockquote>
-</div></section>
-
 <hr class="sep">
 
 <section class="getit" id="getit"><div class="wrap">
@@ -571,7 +567,7 @@ ctx-optimize install --skills   <span class="c"># teaches your coding agent to u
 </div></section>
 
 <footer><div class="wrap">
-  <span>built by <a href="https://github.com/muthuishere">Muthukumaran Navaneethakrishnan</a></span>
+  <span>built by <a href="https://github.com/muthuishere">Muthukumaran Navaneethakrishnan</a> · credit to <a href="https://github.com/Graphify-Labs/graphify">graphify</a>, whose central-store and push/pull design this project's author contributed (<a href="https://github.com/Graphify-Labs/graphify/issues/1751">#1751</a>/<a href="https://github.com/Graphify-Labs/graphify/pull/1752">#1752</a>)</span>
   <span>benchmarks reproducible from <a href="bench/results.json">raw data</a> · demos recorded with <a href="https://github.com/charmbracelet/vhs">vhs</a>, unedited</span>
 </div></footer>
 
