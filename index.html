@@ -135,6 +135,7 @@ h2.sec{font-family:var(--disp);font-size:clamp(1.7rem,3.6vw,2.6rem);font-weight:
 .b-fine{margin-top:14px;font-family:var(--mono);font-size:.75rem;color:var(--dim)}
 .b-fine b{color:var(--muted);font-weight:400}
 .b-group{font-family:var(--mono);font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin:26px 0 0}
+.b-mult.na{color:var(--muted);background:rgba(148,163,184,.08);border-color:rgba(148,163,184,.28)}
 details.rawtable{margin-top:26px}
 details.rawtable summary{cursor:pointer;font-family:var(--mono);font-size:.85rem;color:var(--muted);padding:12px 0;list-style:none}
 details.rawtable summary::-webkit-details-marker{display:none}
@@ -422,18 +423,62 @@ ctx-optimize install --skills               <span class="c"># teach your coding 
 <section class="numbers" id="proof"><div class="wrap">
   <div class="sec-kicker">the kill test</div>
   <h2 class="sec">We tried to kill this product. Published, either way.</h2>
-  <p class="sec-sub">Before launch we pre-committed a kill bar: if the store can't beat a plain grep agent by 25% on hostile terrain, stop. Then we ran it — 12 Linux-kernel questions, answered twice by the <em>same</em> agent (grep-only vs store-first), every answer judged against source-derived ground truth <em>before</em> tokens counted. Measured 2026-07-12 · <a href="proof/RESULTS.md">full write-up</a> · <a href="proof/questions.json">questions&nbsp;+&nbsp;keys</a> · raw runs ship in the repo's <code>proof/</code>.</p>
+  <p class="sec-sub">Before launch we pre-committed a kill bar: if the store can't beat a plain grep agent by 25% on hostile terrain, stop. Then we ran it — 12 Linux-kernel questions, answered twice by the <em>same</em> agent (grep-only vs store-first), every answer judged against source-derived ground truth <em>before</em> tokens counted. Measured 2026-07-12 · <a href="proof/">full write-up</a> · <a href="proof/questions.json">questions&nbsp;+&nbsp;keys (raw json)</a> · raw runs ship in the repo's <code>proof/</code>.</p>
 
-  <details class="rawtable reveal" open>
-    <summary>▸ the numbers — including the ones that don't flatter us</summary>
+  <p class="b-group">fresh tokens to answer the same 12 kernel questions — grep-only arm vs store-first arm, same agent, same model</p>
+  <div class="bench">
+    <div class="b-row reveal">
+      <div class="b-head"><h4>Claude Code · default</h4><span class="b-files">linux/block · 98 files</span><span class="b-mult na">token parity</span></div>
+      <div class="b-bars">
+        <div class="b-line is-us"><span class="b-who">with store</span><div class="b-track"><div class="b-rail"><i class="us" style="width:99.8%"></i></div><em>370k</em></div></div>
+        <div class="b-line"><span class="b-who">grep only</span><div class="b-track"><div class="b-rail"><i class="them" style="width:100%"></i></div><em>370k</em></div></div>
+      </div>
+      <p class="b-fine">steps <b>~flat</b> · wall <b>−14%</b> (347→298s) · quality <b>12/12 vs 11.5/12</b> — the best grep agent on earth doesn't need us for tokens</p>
+    </div>
+    <div class="b-row reveal">
+      <div class="b-head"><h4>Claude Code · Sonnet</h4><span class="b-files">linux slice · 3,987 files</span><span class="b-mult na">grep wins by 5%</span></div>
+      <div class="b-bars">
+        <div class="b-line is-us"><span class="b-who">with store</span><div class="b-track"><div class="b-rail"><i class="us" style="width:100%"></i></div><em>390k</em></div></div>
+        <div class="b-line"><span class="b-who">grep only</span><div class="b-track"><div class="b-rail"><i class="them" style="width:95%"></i></div><em>370k</em></div></div>
+      </div>
+      <p class="b-fine">steps <b>−13%</b> · wall <b>+3%</b> (386→397s) · quality <b>11.5/12 vs 12/12</b> — the store arm was the only one to catch a comment posing as a real caller</p>
+    </div>
+    <div class="b-row reveal">
+      <div class="b-head"><h4>Claude Code · Haiku</h4><span class="b-files">linux slice · 3,987 files</span><span class="b-mult na">token parity</span></div>
+      <div class="b-bars">
+        <div class="b-line is-us"><span class="b-who">with store</span><div class="b-track"><div class="b-rail"><i class="us" style="width:98.9%"></i></div><em>284k</em></div></div>
+        <div class="b-line"><span class="b-who">grep only</span><div class="b-track"><div class="b-rail"><i class="them" style="width:100%"></i></div><em>287k</em></div></div>
+      </div>
+      <p class="b-fine">steps <b>−29%</b> · wall <b>+9%</b> (641→698s) · quality <b>11/12 vs 11/12</b> — a third fewer hops, but caching makes hops free</p>
+    </div>
+    <div class="b-row reveal">
+      <div class="b-head"><h4>Codex CLI · default</h4><span class="b-files">linux/block · 98 files</span><span class="b-mult na">token parity</span></div>
+      <div class="b-bars">
+        <div class="b-line is-us"><span class="b-who">with store</span><div class="b-track"><div class="b-rail"><i class="us" style="width:100%"></i></div><em>397k</em></div></div>
+        <div class="b-line"><span class="b-who">grep only</span><div class="b-track"><div class="b-rail"><i class="them" style="width:97.1%"></i></div><em>386k</em></div></div>
+      </div>
+      <p class="b-fine">steps <b>~flat</b> · wall <b>±0%</b> (683→680s) · quality <b>11.5/12 vs 11.5/12</b> — its grep arm named the wrong gatekeeper; the store arm didn't</p>
+    </div>
+    <div class="b-row reveal">
+      <div class="b-head"><h4>Devin CLI · SWE-1.6</h4><span class="b-files">linux/block · 98 files · n=6</span><span class="b-mult">−42% tokens</span></div>
+      <div class="b-bars">
+        <div class="b-line is-us"><span class="b-who">with store</span><div class="b-track"><div class="b-rail"><i class="us" style="width:57.5%"></i></div><em>2.30M</em></div></div>
+        <div class="b-line"><span class="b-who">grep only</span><div class="b-track"><div class="b-rail"><i class="them" style="width:100%"></i></div><em>4.00M</em></div></div>
+      </div>
+      <p class="b-fine">steps <b>−24%</b> · wall <b>−34%</b> (294→195s) · quality <b>5/6 vs 6/6</b> · no prompt caching — every step re-pays full context, so saved steps become saved money · daily quota cut the run at 6 pairs</p>
+    </div>
+  </div>
+
+  <details class="rawtable reveal">
+    <summary>▸ raw table — every number in one place</summary>
     <div class="tablewrap">
     <table>
       <tr><th>harness · model</th><th>corpus</th><th>tokens, grep→store</th><th>steps</th><th>wall time</th><th>answer quality (grep vs store)</th></tr>
-      <tr><td>Claude Code · default</td><td>linux/block · 98 files</td><td>±0% — parity</td><td>~flat</td><td class="win">−14% · 347→298s</td><td>12/12 vs 11.5/12</td></tr>
-      <tr><td>Claude Code · Sonnet</td><td>linux slice · 3,987 files</td><td>+5% — grep wins</td><td class="win">−13%</td><td>+3% · 386→397s</td><td>11.5/12 vs <b>12/12</b> — store arm more precise</td></tr>
-      <tr><td>Claude Code · Haiku</td><td>linux slice · 3,987 files</td><td>−1% — parity</td><td class="win">−29%</td><td>+9% · 641→698s</td><td>11/12 vs 11/12</td></tr>
-      <tr><td>Codex CLI · default</td><td>linux/block · 98 files</td><td>+3% — parity</td><td>~flat</td><td>±0% · 683→680s</td><td>11.5/12 vs 11.5/12</td></tr>
-      <tr><td>Devin CLI · SWE-1.6</td><td>linux/block · 98 files (n=6)</td><td class="win">−42%</td><td class="win">−24%</td><td class="win">−34% · 294→195s</td><td>5/6 vs <b>6/6</b></td></tr>
+      <tr><td>Claude Code · default</td><td>linux/block · 98 files</td><td>370,398 → 369,673 (±0%)</td><td>~flat</td><td class="win">347→298s (−14%)</td><td>12/12 vs 11.5/12</td></tr>
+      <tr><td>Claude Code · Sonnet</td><td>linux slice · 3,987 files</td><td>370,308 → 389,647 (+5%)</td><td class="win">89→77 (−13%)</td><td>386→397s (+3%)</td><td>11.5/12 vs <b>12/12</b></td></tr>
+      <tr><td>Claude Code · Haiku</td><td>linux slice · 3,987 files</td><td>286,943 → 283,669 (−1%)</td><td class="win">174→124 (−29%)</td><td>641→698s (+9%)</td><td>11/12 vs 11/12</td></tr>
+      <tr><td>Codex CLI · default</td><td>linux/block · 98 files</td><td>385,794 → 397,323 (+3%)</td><td>~flat</td><td>683→680s (±0%)</td><td>11.5/12 vs 11.5/12</td></tr>
+      <tr><td>Devin CLI · SWE-1.6</td><td>linux/block · 98 files (n=6)</td><td class="win">4,004,232 → 2,300,736 (−42%)</td><td class="win">−24%</td><td class="win">294→195s (−34%)</td><td>5/6 vs <b>6/6</b></td></tr>
     </table>
     </div>
   </details>
