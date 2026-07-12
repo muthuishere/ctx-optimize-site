@@ -2,7 +2,7 @@
   "model": "openai/gpt-4o-mini",
   "arm": "b",
   "question": "If I change the Route.Match method, what other code depends on it or calls it?",
-  "wall_s": 1.62,
+  "wall_s": 2.09,
   "steps": 1,
   "tool_calls": {
     "run_shell": 0,

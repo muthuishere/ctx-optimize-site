@@ -57,23 +57,25 @@ li{margin:8px 0}
 <div class="tbl">
 <table>
 <tr><th>metric</th><th class="r">a shell</th><th class="r">b ctx-optimize</th><th class="r">c graphify</th><th class="r">b vs a</th><th class="r">c vs a</th></tr>
-<tr><td>tokens</td><td class="r">11,636</td><td class="r">9,613</td><td class="r">18,342</td><td class="r win">−17%</td><td class="r loss">+58%</td></tr>
-<tr><td>cost</td><td class="r">$0.0018</td><td class="r">$0.0013</td><td class="r">$0.0025</td><td class="r win">−31%</td><td class="r loss">+39%</td></tr>
-<tr><td>tool calls</td><td class="r">12</td><td class="r">4</td><td class="r">8</td><td class="r win">−67%</td><td class="r win">−33%</td></tr>
-<tr><td>wall time</td><td class="r">12.6s</td><td class="r">8.6s</td><td class="r">15.3s</td><td class="r win">−32%</td><td class="r loss">+22%</td></tr>
+<tr><td>tokens</td><td class="r">15,078</td><td class="r">9,659</td><td class="r">18,352</td><td class="r win">−36%</td><td class="r loss">+22%</td></tr>
+<tr><td>cost</td><td class="r">$0.0024</td><td class="r">$0.0016</td><td class="r">$0.0025</td><td class="r win">−31%</td><td class="r loss">+7%</td></tr>
+<tr><td>tool calls</td><td class="r">11</td><td class="r">4</td><td class="r">8</td><td class="r win">−64%</td><td class="r win">−27%</td></tr>
+<tr><td>wall time</td><td class="r">16.5s</td><td class="r">11.8s</td><td class="r">18.7s</td><td class="r win">−29%</td><td class="r loss">+13%</td></tr>
 </table>
 </div>
 
 <div class="note"><b>Read it honestly.</b> ctx-optimize beats plain shell on every axis and answers most questions in a <em>single</em> <code>query</code>/<code>card</code> call. graphify cuts tool calls too — but its <code>query</code> returns a raw BFS dump of 100+ nodes, so the model burns more tokens wading through it, landing graphify <em>above</em> plain grep on tokens and cost. Head-to-head, ctx-optimize uses <b>about half</b> graphify's tokens, cost, and steps. Both arms answered correctly with <code>file:line</code> citations — a cheaper wrong answer would be a loss, not a saving.</div>
 
 <h2>The actual run — raw records, nothing massaged</h2>
-<p>This table wasn't typed by hand — a GitHub Actions job produced it. The source repo is private, so its Actions page isn't public; instead, <b>the exact raw records that run wrote are published here</b>, straight from the job's artifact. Each file is the model's full transcript for one arm × one question: the tools it called, OpenRouter's token/cost accounting, and the final answer.</p>
+<p>This table wasn't typed by hand — a GitHub Actions job produced it, headless, on a clean runner. <b>Open the run and read every log line yourself:</b></p>
+<p style="margin:16px 0"><a href="https://github.com/muthuishere/ctx-optimize-site/actions/runs/29193645340" style="display:inline-block;font-family:var(--mono);font-size:.9rem;font-weight:600;background:var(--bg2);border:1px solid var(--accent);border-radius:10px;padding:12px 20px">▶ Watch this run on GitHub Actions →</a></p>
+<p>The workflow lives in this <em>public</em> repo, so the run is fully viewable and forkable — no private access needed. Below are the exact raw records it wrote, straight from the job's artifact: each file is the model's full transcript for one arm × one question — the tools it called, OpenRouter's token/cost accounting, and the final answer.</p>
 <div class="tbl">
 <table>
 <tr><th>field</th><th>value</th></tr>
-<tr><td>workflow</td><td><a href="benchmark.yml">benchmark.yml</a> · GitHub Actions</td></tr>
-<tr><td>run</td><td>#29192655890 · commit <code>0a38b9b</code></td></tr>
-<tr><td>date</td><td>2026-07-12 · conclusion <span class="win">success</span> · ~58s headless</td></tr>
+<tr><td>workflow</td><td><a href="https://github.com/muthuishere/ctx-optimize-site/blob/main/.github/workflows/benchmark.yml">benchmark.yml</a> · public, forkable</td></tr>
+<tr><td>run</td><td><a href="https://github.com/muthuishere/ctx-optimize-site/actions/runs/29193645340">#29193645340</a> · commit <code>9529e8e</code></td></tr>
+<tr><td>date</td><td>2026-07-12 · conclusion <span class="win">success</span> · headless</td></tr>
 <tr><td>model</td><td><code>openai/gpt-4o-mini</code> via OpenRouter</td></tr>
 </table>
 </div>

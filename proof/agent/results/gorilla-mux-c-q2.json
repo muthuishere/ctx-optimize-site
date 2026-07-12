@@ -2,7 +2,7 @@
   "model": "openai/gpt-4o-mini",
   "arm": "c",
   "question": "What does the router's ServeHTTP method do, and where is it defined?",
-  "wall_s": 3.95,
+  "wall_s": 3.01,
   "steps": 2,
   "tool_calls": {
     "run_shell": 0,
