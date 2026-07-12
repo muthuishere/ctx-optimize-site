@@ -443,6 +443,10 @@ ctx-optimize install --skills               <span class="c"># teach your coding 
   </div>
   <p class="b-fine" style="margin-top:12px">Tokens &amp; cost: natural usage on Claude Code — plain questions, real dollars, no store vs store. Query latency: 12k-file benchmark. Honest caveat: total session wall runs <b>+31%</b> today (the store trades wall-time for tokens and dollars — more tool calls); we just cut query latency 40% and that gap is closing.</p>
 
+  <div class="method reveal" style="margin-top:30px">
+    <b>Don't take our word — run the workflow.</b> A headless <a href="https://github.com/muthuishere/ctx-optimize/blob/main/.github/workflows/benchmark.yml">GitHub Action</a> clones a repo, builds the store, and lets the <em>same</em> model (over <a href="https://openrouter.ai">OpenRouter</a>) answer each question twice — shell-only vs store-first — reporting the provider's own token &amp; dollar accounting. Fork, add your <code>OPENROUTER_API_KEY</code>, click <em>Run workflow</em>. Last CI run on <code>gorilla/mux</code> — a small, well-named repo, i.e. grep's <em>best</em> case: <b>−67% tool calls · −21% wall · −10% tokens · cheaper every run</b>. On bigger, messier code the gap only widens. <a href="https://github.com/muthuishere/ctx-optimize/tree/main/proof/agent">harness + reproduce steps</a>.
+  </div>
+
   <p class="b-group">the result that clears the bar — natural usage, plain questions, real dollars billed</p>
   <div class="bench">
     <div class="b-row reveal">
