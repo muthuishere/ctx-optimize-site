@@ -215,6 +215,8 @@ hr.sep{border:none;border-top:1px solid var(--border);max-width:1080px;margin:0 
     <a class="btn btn-primary" href="#getstart">Get started</a>
     <a class="btn btn-ghost" href="#demo">Watch it answer</a>
   </div>
+  <pre class="reveal" style="margin-top:24px;max-width:560px"><span class="g">npm install -g @muthuishere/ctx-optimize</span>
+ctx-optimize init &amp;&amp; ctx-optimize add .   <span class="c"># then ask your agent anything</span></pre>
 </div></header>
 
 <section class="getit" id="getstart" style="padding:70px 0 20px"><div class="wrap">
@@ -426,7 +428,7 @@ ctx-optimize install --skills               <span class="c"># teach your coding 
   <p class="sec-sub">Before launch we pre-committed a kill bar: if the store can't beat a plain grep agent by 25% on hostile terrain, stop. Then we ran it — 12 Linux-kernel questions, answered twice by the <em>same</em> agent (grep-only vs store-first), every answer judged against source-derived ground truth <em>before</em> tokens counted. Measured 2026-07-12 · <a href="proof/">full write-up</a> · <a href="proof/questions.json">questions&nbsp;+&nbsp;keys (raw json)</a> · raw runs ship in the repo's <code>proof/</code>.</p>
 
   <div class="method reveal" style="margin-top:26px">
-    <b>Bottom line.</b> On the naive metric — fresh input+output tokens, on a frontier CLI that caches aggressively — the store is a wash, and we show every tier of that below. But that metric prices cache reads at zero. On the <em>real bill</em>, and once cards carry the function body, the store clears the bar we set: <b>−31.6% cost, zero steering</b>. Here is the whole honest picture — the win and the miss.
+    <b>graphify headlines 71.5× — against pasting your entire repo into every prompt.</b> No agent does that. We threw the strawman out, tested against a real grep agent, and judged every answer before counting a token. Measured here: <b>−31.6% cost, deterministic, ~96ms queries (~4× graphify's).</b> A smaller honest number beats a big fake one.
   </div>
 
   <p class="b-group">the result that clears the bar — natural usage, plain questions, real dollars billed</p>
