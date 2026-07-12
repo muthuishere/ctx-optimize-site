@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ctx-optimize — a deterministic code knowledge graph for agents</title>
+<meta name="description" content="One static Go binary that turns any repo into a queryable knowledge graph. No LLM at query time, no database, no server. Built for coding agents.">
+<style>
+:root{
+  --bg:#0d1117; --panel:#161b22; --border:#21262d; --text:#e6edf3;
+  --muted:#8b949e; --accent:#58a6ff; --green:#3fb950; --amber:#d29922;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.6}
+.wrap{max-width:960px;margin:0 auto;padding:0 24px}
+header{padding:88px 0 48px;text-align:center}
+h1{font-size:2.6rem;letter-spacing:-.02em}
+h1 .dim{color:var(--muted)}
+.tag{color:var(--muted);font-size:1.2rem;max-width:640px;margin:16px auto 0}
+.badges{margin-top:24px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.badge{font-family:var(--mono);font-size:.8rem;border:1px solid var(--border);border-radius:20px;padding:4px 14px;color:var(--muted)}
+.badge b{color:var(--green);font-weight:600}
+section{padding:48px 0;border-top:1px solid var(--border)}
+h2{font-size:1.5rem;margin-bottom:8px}
+.sub{color:var(--muted);margin-bottom:28px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:16px}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:20px}
+.card h3{font-size:1rem;margin-bottom:6px}
+.card h3 code{color:var(--accent)}
+.card p{color:var(--muted);font-size:.9rem}
+code,pre{font-family:var(--mono)}
+pre{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:16px 20px;overflow-x:auto;font-size:.85rem;line-height:1.7}
+.demo{margin:28px 0}
+.demo h3{font-size:1.05rem;margin-bottom:4px}
+.demo p{color:var(--muted);font-size:.9rem;margin-bottom:12px}
+.demo video{width:100%;border-radius:10px;border:1px solid var(--border);display:block}
+table{width:100%;border-collapse:collapse;font-size:.9rem;margin:16px 0}
+th,td{padding:10px 12px;text-align:right;border-bottom:1px solid var(--border)}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--muted);font-weight:600;font-size:.8rem;text-transform:uppercase;letter-spacing:.05em}
+td{font-family:var(--mono);font-size:.85rem}
+td:first-child{font-family:var(--sans)}
+.win{color:var(--green);font-weight:600}
+.method{background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--amber);border-radius:10px;padding:18px 22px;font-size:.9rem;color:var(--muted);margin-top:20px}
+.method b{color:var(--text)}
+footer{padding:48px 0;color:var(--muted);font-size:.85rem;text-align:center}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+.tablewrap{overflow-x:auto}
+@media (max-width:640px){h1{font-size:1.9rem}}
+</style>
+</head>
+<body>
+
+<header class="wrap">
+  <h1>ctx-optimize<span class="dim"> — your repo, as a graph, in a second</span></h1>
+  <p class="tag">A deterministic code knowledge graph for coding agents. One static Go binary. No LLM at query time, no database, no server — the graph serves context, your agent supplies the intelligence.</p>
+  <div class="badges">
+    <span class="badge"><b>12</b> languages embedded</span>
+    <span class="badge"><b>~1s</b> to gather 12k files</span>
+    <span class="badge"><b>~100ms</b> queries</span>
+    <span class="badge"><b>0</b> runtime dependencies</span>
+  </div>
+</header>
+
+<section class="wrap" id="why">
+  <h2>Why</h2>
+  <p class="sub">Coding agents burn their context window on grep round-trips and speculative file reads. The single most expensive pattern we measured: the agent finds a symbol, then opens the whole file just to see its signature. ctx-optimize pre-computes the graph once — declarations, calls, imports, docs — and answers from it in milliseconds, with citations, so the agent reads only what it must.</p>
+  <div class="grid">
+    <div class="card"><h3>Deterministic by contract</h3><p>The binary never calls a model, a database, or the network (except the remote <em>you</em> configure). Same input, same graph, byte for byte. Git-diffable output.</p></div>
+    <div class="card"><h3>Symbol cards</h3><p><code>card Store.Merge</code> returns the signature, doc comment, location, callers and callees in one shot — no file read needed to cite or call a symbol.</p></div>
+    <div class="card"><h3>Honest edges</h3><p>Every edge carries confidence: <code>EXTRACTED</code> is parsed fact, <code>INFERRED</code> is name-matched. Ambiguous calls are dropped, never guessed.</p></div>
+    <div class="card"><h3>Wiki on every gather</h3><p>Each <code>add</code> regenerates a deterministic markdown wiki — index, hub pages, per-file pages — readable by humans and agents alike.</p></div>
+    <div class="card"><h3>Extensible-first</h3><p>Drop a script in <code>.ctxoptimize/adapters/</code> and it runs on every add. Drop a grammar pack in <code>grammars/</code> and the language works. No forking the tool.</p></div>
+    <div class="card"><h3>Team sync, no server</h3><p><code>remote push / pull</code> to any S3-compatible bucket. Credentials as <code>${VAR}</code> names in a committable config — values never written, never printed.</p></div>
+  </div>
+</section>
+
+<section class="wrap" id="demos">
+  <h2>Demos</h2>
+  <p class="sub">Real terminal recordings, unedited. Flask's source and ctx-optimize's own repo.</p>
+
+  <div class="demo"><h3>Gather a repo in about a second</h3>
+    <p><code>ctx-optimize add .</code> — parse, graph, prune stale nodes, regenerate the wiki.</p>
+    <video src="media/01-add.mp4" autoplay loop muted playsinline></video></div>
+
+  <div class="demo"><h3>Ask, get cited answers with signatures</h3>
+    <p>Deterministic lexical + graph retrieval. Every hit carries id, kind, file, line range, signature, and its neighborhood.</p>
+    <video src="media/02-query.mp4" autoplay loop muted playsinline></video></div>
+
+  <div class="demo"><h3>Symbol cards — zero file reads</h3>
+    <p>Signature, doc comment, callers, callees. The pointer-chase read is gone.</p>
+    <video src="media/03-card.mp4" autoplay loop muted playsinline></video></div>
+
+  <div class="demo"><h3>Blast radius and paths</h3>
+    <p><code>affected</code> walks reverse dependencies; <code>path</code> connects any two symbols.</p>
+    <video src="media/04-impact.mp4" autoplay loop muted playsinline></video></div>
+
+  <div class="demo"><h3>Languages: embedded + one-command packs</h3>
+    <p>go, python, js/ts/tsx, java, c, c++, c#, rust, zig, sql built in. Anything else: <code>languages add &lt;name-or-github-url&gt;</code> builds a drop-in grammar pack.</p>
+    <video src="media/05-languages.mp4" autoplay loop muted playsinline></video></div>
+
+  <div class="demo"><h3>Wiki + exports</h3>
+    <p>Markdown wiki on every add; export to GraphML, CSV, DOT, JSON, or a full Obsidian vault.</p>
+    <video src="media/06-wiki.mp4" autoplay loop muted playsinline></video></div>
+</section>
+
+<section class="wrap" id="benchmarks">
+  <h2>Benchmarks vs graphify</h2>
+  <p class="sub">Measured 2026-07-11 on an Apple M5 Pro (18 cores, 48 GB). graphify 0.9.12 (installed CLI) vs a ctx-optimize dev build. Raw data: <a href="bench/results.json">results.json</a>.</p>
+
+  <div class="tablewrap">
+  <table>
+    <tr><th>corpus</th><th>files</th><th colspan="2">cold gather</th><th colspan="2">nodes found</th><th colspan="2">output size</th></tr>
+    <tr><th></th><th></th><th>ctx-optimize</th><th>graphify</th><th>ctx-optimize</th><th>graphify</th><th>ctx-optimize</th><th>graphify</th></tr>
+    <tr><td>graphify's own source</td><td>12,484</td><td class="win">0.67s</td><td>8.88s</td><td>11,056</td><td>10,996</td><td class="win">8.3 MB</td><td>30.1 MB</td></tr>
+    <tr><td>flask</td><td>265</td><td class="win">0.79s</td><td>1.06s</td><td>1,978</td><td>1,473</td><td class="win">1.3 MB</td><td>4.2 MB</td></tr>
+    <tr><td>gin</td><td>159</td><td class="win">0.41s</td><td>0.90s</td><td>1,922</td><td>1,975</td><td class="win">1.4 MB</td><td>6.2 MB</td></tr>
+    <tr><td>ctx-optimize source</td><td>75</td><td class="win">0.37s</td><td>0.51s</td><td>572</td><td>599</td><td class="win">0.4 MB</td><td>2.2 MB</td></tr>
+  </table>
+  </div>
+
+  <div class="tablewrap">
+  <table>
+    <tr><th>query (on the 12k-file corpus)</th><th>ctx-optimize</th><th>graphify</th></tr>
+    <tr><td>"how does clustering work"</td><td class="win">89 ms</td><td>367 ms</td></tr>
+    <tr><td>"remote push pull hooks"</td><td class="win">96 ms</td><td>364 ms</td></tr>
+    <tr><td>"community labeling"</td><td class="win">96 ms</td><td>370 ms</td></tr>
+  </table>
+  </div>
+
+  <div class="method"><b>Methodology — read this before quoting the numbers.</b>
+    graphify was timed on its <em>fastest</em> deterministic path (<code>update --no-cluster</code>: extraction only, no clustering, no LLM). ctx-optimize was timed on <code>add</code>, which does <em>more</em> work per run: extraction, graph build, stale-node pruning, and full wiki regeneration. Query latency is the median of 5 runs, same question, same 2,000-token budget, both CLIs invoked cold from the shell. Node counts are within a few percent of each other on shared corpora — both tools parsed the same code; on gin and on its own source graphify finds slightly more edges than we do, and we show that as-is. graphify also does things ctx-optimize deliberately does not: LLM-assisted community labeling and semantic clustering. If you want those, use graphify — the comparison here is the deterministic core both tools share.</div>
+</section>
+
+<section class="wrap" id="design">
+  <h2>Design</h2>
+  <p class="sub">What's in the binary, and what never will be.</p>
+  <pre>
+in:   tree-sitter grammars compiled to WASI, hosted by wazero (pure Go, CGO_ENABLED=0)
+      one committable .ctxoptimize/ dir per repo: config.json + adapters/
+      central store at ~/ctxoptimize/&lt;repo&gt;/ — multi-module, git-diffable NDJSON
+      query · card · explain · path · affected · hubs · wiki · export · serve
+
+out:  no LLM API      the host agent answers; we serve context
+      no database     files, sorted, atomic writes
+      no embeddings   lexical + graph retrieval, deterministic
+      no server       a static binary and your filesystem</pre>
+</section>
+
+<section class="wrap" id="lineage">
+  <h2>Lineage</h2>
+  <p class="sub" style="margin-bottom:12px">With all due respect to <a href="https://github.com/graphify-dev/graphify">graphify</a>.</p>
+  <p style="color:var(--muted);font-size:.95rem">ctx-optimize exists because of graphify, and openly builds on its best ideas — the fail-closed batch door, query budgets, the save-result/reflect feedback loop. The central store and the remote push/pull hook design were contributed <em>to</em> graphify by this project's author (graphify #1751 / #1752, git-verifiable) before this project existed. Where graphify reaches for an LLM — wiki generation, community naming — ctx-optimize stays deterministic and hands the intelligence back to the host agent. Different bet, shared respect.</p>
+</section>
+
+<section class="wrap" id="install">
+  <h2>Get it</h2>
+  <p class="sub" style="margin-bottom:12px">The source is in a private repository while the first release hardens. Binary releases and an npm wrapper are staged and coming shortly — this page will carry the install command when they land.</p>
+  <pre># soon:
+npm install -g ctx-optimize     # or a single downloaded binary
+ctx-optimize init && ctx-optimize add .
+ctx-optimize install --skills   # teaches your coding agent to use the store</pre>
+</section>
+
+<footer class="wrap">
+  built by <a href="https://github.com/muthuishere">Muthukumaran Navaneethakrishnan</a> · benchmarks reproducible from <a href="bench/results.json">raw data</a> · demos recorded with <a href="https://github.com/charmbracelet/vhs">vhs</a>, unedited
+</footer>
+
+</body>
+</html>
