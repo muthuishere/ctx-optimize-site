@@ -428,12 +428,12 @@ ctx-optimize install --skills               <span class="c"># teach your coding 
     <summary>▸ the numbers — including the ones that don't flatter us</summary>
     <div class="tablewrap">
     <table>
-      <tr><th>harness · model</th><th>corpus</th><th>tokens, grep→store</th><th>steps</th><th>answer quality (grep vs store)</th></tr>
-      <tr><td>Claude Code · default</td><td>linux/block · 98 files</td><td>±0% — parity</td><td>~flat</td><td>12/12 vs 11.5/12</td></tr>
-      <tr><td>Claude Code · Sonnet</td><td>linux slice · 3,987 files</td><td>+5% — grep wins</td><td class="win">−13%</td><td>11.5/12 vs <b>12/12</b> — store arm more precise</td></tr>
-      <tr><td>Claude Code · Haiku</td><td>linux slice · 3,987 files</td><td>−1% — parity</td><td class="win">−29%</td><td>11/12 vs 11/12</td></tr>
-      <tr><td>Codex CLI · default</td><td>linux/block · 98 files</td><td>+3% — parity</td><td>~flat</td><td>11.5/12 vs 11.5/12</td></tr>
-      <tr><td>Devin CLI · SWE-1.6</td><td>linux/block · 98 files (n=6)</td><td class="win">−42%</td><td class="win">−24%</td><td>5/6 vs <b>6/6</b></td></tr>
+      <tr><th>harness · model</th><th>corpus</th><th>tokens, grep→store</th><th>steps</th><th>wall time</th><th>answer quality (grep vs store)</th></tr>
+      <tr><td>Claude Code · default</td><td>linux/block · 98 files</td><td>±0% — parity</td><td>~flat</td><td class="win">−14% · 347→298s</td><td>12/12 vs 11.5/12</td></tr>
+      <tr><td>Claude Code · Sonnet</td><td>linux slice · 3,987 files</td><td>+5% — grep wins</td><td class="win">−13%</td><td>+3% · 386→397s</td><td>11.5/12 vs <b>12/12</b> — store arm more precise</td></tr>
+      <tr><td>Claude Code · Haiku</td><td>linux slice · 3,987 files</td><td>−1% — parity</td><td class="win">−29%</td><td>+9% · 641→698s</td><td>11/12 vs 11/12</td></tr>
+      <tr><td>Codex CLI · default</td><td>linux/block · 98 files</td><td>+3% — parity</td><td>~flat</td><td>±0% · 683→680s</td><td>11.5/12 vs 11.5/12</td></tr>
+      <tr><td>Devin CLI · SWE-1.6</td><td>linux/block · 98 files (n=6)</td><td class="win">−42%</td><td class="win">−24%</td><td class="win">−34% · 294→195s</td><td>5/6 vs <b>6/6</b></td></tr>
     </table>
     </div>
   </details>
@@ -450,7 +450,7 @@ ctx-optimize install --skills               <span class="c"># teach your coding 
   </div>
 
   <div class="method reveal"><b>The mechanism is step-cost economics, not magic.</b>
-    The store cuts agent <em>steps</em> at every model tier (Haiku −29%, Devin −24%, Sonnet −13%). Whether fewer steps become fewer <em>tokens</em> depends on what your harness pays per step: Devin re-pays the full context every step (zero cached tokens in its own metrics), so −24% steps became −42% tokens. Claude Code's prompt caching makes extra steps nearly free, so it lands at parity. If your agent runs on pay-per-step economics — API scaffolds, CI loops, custom harnesses, anything without aggressive caching — the savings are real. If you run a cached frontier CLI, what you get is fewer steps, lower latency, and fewer confidently-wrong answers, not a smaller bill. Scale note: the 3,987-file kernel slice became a 274,812-node store with 3,989 wiki pages in <b>5.5s</b>; queries answer in ~1.7s at that scale. The test also surfaced three defects in our own query ranking and card output — they're in the write-up, on the fix list, and we'll re-run and publish both numbers.</div>
+    The store cuts agent <em>steps</em> at every model tier (Haiku −29%, Devin −24%, Sonnet −13%). Whether fewer steps become fewer <em>tokens</em> depends on what your harness pays per step: Devin re-pays the full context every step (zero cached tokens in its own metrics), so −24% steps became −42% tokens. Claude Code's prompt caching makes extra steps nearly free, so it lands at parity. If your agent runs on pay-per-step economics — API scaffolds, CI loops, custom harnesses, anything without aggressive caching — the savings are real. If you run a cached frontier CLI, what you get is fewer steps and fewer confidently-wrong answers, not a smaller bill — and wall time follows the same economics: −14% on Claude default and −34% on Devin, but flat on Codex and slightly <em>slower</em> on Sonnet/Haiku, where the smaller models spend longer digesting store output per step. All of it is in the table above, unrounded in the raw data. Scale note: the 3,987-file kernel slice became a 274,812-node store with 3,989 wiki pages in <b>5.5s</b>; queries answer in ~1.7s at that scale. The test also surfaced three defects in our own query ranking and card output — they're in the write-up, on the fix list, and we'll re-run and publish both numbers.</div>
 </div></section>
 
 <hr class="sep">
