@@ -81,6 +81,17 @@ li{margin:8px 0}
 </ol>
 <p>All three are on the fix list. When they're fixed we'll re-run arm B and publish both numbers, before and after.</p>
 
+<h2>Addendum 1 — cost-true accounting (cache reads are not free)</h2>
+<p>The tables above compare "fresh tokens", which prices cache reads at zero. They bill at ~10% of input price, and every extra agent turn re-reads the whole conversation. On <code>total_cost_usd</code> — the harness's own bill — the steered store arm is <b>cheaper at every Claude tier: −9.2% (default, $3.55→$3.22), −5.6% (Sonnet), −16.2% (Haiku)</b>, driven by ~26% fewer cache re-reads. The parity verdict above is the free-cache view; the dollar view favors the store.</p>
+
+<h2>Addendum 2 — the natural-usage test (no steering at all)</h2>
+<p>The arms above steer the agent with a prompt. The honest product test is: install the skill, ask a <em>plain</em> question, observe. Measured:</p>
+<ul>
+<li><b>A skill alone never fires</b> — 0 store calls across one-shots with both a passive and a maximally imperative description. (graphify's skill uses the same passive trigger pattern; this failure mode is not unique to us.)</li>
+<li><b>What works: a pointer block in the repo's <code>CLAUDE.md</code>/<code>AGENTS.md</code></b> — the instruction files Claude Code, Codex, Copilot, OpenCode and Devin all load natively. With it the agent made <b>55–57 unprompted store calls</b> per 12-question run. <code>ctx-optimize init</code> now writes this block; <code>install --skills</code> covers every CLI with a native skill dir.</li>
+<li><b>Cost today: +6% vs a no-store baseline</b> (v1 of the block: +11%; v2 "use it INSTEAD, cite directly, don't re-verify": +6%, turns −6%). Mechanism/architecture questions already win naturally (−13…25% cost); enumeration sweeps and body-constant questions lose — cards don't yet carry function bodies, so those reads still happen <em>on top</em>. That body-head card (in the original design, unbuilt) plus the three defects above are the fix list; we'll re-run this exact harness after and publish both runs.</li>
+</ul>
+
 <h2>Raw data</h2>
 <ul>
 <li><a href="questions.json">questions.json</a> — the 12 questions with ground-truth keys</li>
