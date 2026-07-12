@@ -197,11 +197,11 @@ hr.sep{border:none;border-top:1px solid var(--border);max-width:1080px;margin:0 
 <nav><div class="wrap">
   <div class="logo">ctx-<em>optimize</em></div>
   <ul>
+    <li><a href="#getstart">Get started</a></li>
+    <li><a href="#agent">Agent skills</a></li>
     <li><a href="#demo">Demo</a></li>
     <li><a href="#numbers">Benchmarks</a></li>
-    <li><a href="#three">Why</a></li>
     <li><a href="#lineage">Lineage</a></li>
-    <li><a href="#getit">Get it</a></li>
   </ul>
 </div></nav>
 
@@ -210,10 +210,27 @@ hr.sep{border:none;border-top:1px solid var(--border);max-width:1080px;margin:0 
   <h1>Your agent is burning its context window on grep.<br><span class="ghost">Stop paying for reads it never needed.</span></h1>
   <p class="lede">ctx-optimize turns any repo into a queryable knowledge graph — <b>12,000 files in 0.67 seconds</b> — and answers your agent's questions in ~100ms, with citations. One static Go binary. <b>No LLM at query time, no database, no server.</b></p>
   <div class="cta">
-    <a class="btn btn-primary" href="#demo">Watch it answer</a>
-    <a class="btn btn-ghost" href="#numbers">See the benchmarks</a>
+    <a class="btn btn-primary" href="#getstart">Get started</a>
+    <a class="btn btn-ghost" href="#demo">Watch it answer</a>
   </div>
 </div></header>
+
+<section class="getit" id="getstart" style="padding:70px 0 20px"><div class="wrap">
+  <div class="sec-kicker">get started</div>
+  <h2 class="sec">Three commands to a smarter agent.</h2>
+  <pre class="reveal"><span class="g">npm install -g @muthuishere/ctx-optimize</span>   <span class="c"># one static binary per platform, no postinstall downloads</span>
+ctx-optimize init && ctx-optimize add .     <span class="c"># gather this repo — about a second</span>
+ctx-optimize install --skills               <span class="c"># teach your coding agent to answer from the store</span></pre>
+  <p class="sec-sub" style="margin-top:18px">v0.1.0 · macOS / Linux / Windows · works with Claude Code, Codex, and any skill-capable agent.</p>
+</div></section>
+
+<section class="herodemo" id="agent" style="padding:70px 0"><div class="wrap">
+  <div class="sec-kicker">agent skills — and everything else your repo knows</div>
+  <h2 class="sec">Docs, your database schema, any data — one graph, one question.</h2>
+  <p class="sec-sub">The installed skill makes your agent query the store before it greps. Markdown docs are gathered natively. Your Postgres schema arrives via a <a href="https://github.com/muthuishere/ctx-optimize/blob/main/examples/adapters/postgres-schema.py">drop-in adapter script</a> — tables become nodes, foreign keys become edges. Anything else goes through the validated JSON door. Then one question cites the table, the code, and the doc together:</p>
+  <video src="media/adapters.mp4" autoplay loop muted playsinline class="reveal"></video>
+  <p class="cap">Unedited recording · a repo with <code>.ctxoptimize/adapters/postgres-schema.py</code> against a live Postgres</p>
+</div></section>
 
 <section class="bignum"><div class="wrap"><div class="frame reveal">
   <div class="headline">Same corpus. Same machine. <em>13&times; faster.</em></div>
@@ -437,11 +454,9 @@ hr.sep{border:none;border-top:1px solid var(--border);max-width:1080px;margin:0 
 <hr class="sep">
 
 <section class="getit" id="getit"><div class="wrap">
-  <div class="sec-kicker">get it</div>
-  <h2 class="sec">Releases are staged. This page gets the command first.</h2>
-  <p class="sec-sub">The source is in a private repository while the first release hardens. Binary releases and an npm wrapper are coming shortly.</p>
-  <pre class="reveal"><span class="c"># soon:</span>
-<span class="g">npm install -g ctx-optimize</span>     <span class="c"># or a single downloaded binary</span>
+  <div class="sec-kicker">install</div>
+  <h2 class="sec">Convinced? It's still three commands.</h2>
+  <pre class="reveal"><span class="g">npm install -g @muthuishere/ctx-optimize</span>
 ctx-optimize init && ctx-optimize add .
 ctx-optimize install --skills   <span class="c"># teaches your coding agent to use the store</span></pre>
 </div></section>
