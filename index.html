@@ -427,7 +427,7 @@ ctx-optimize install --skills               <span class="c"># teach your coding 
 <section class="numbers" id="proof"><div class="wrap">
   <div class="sec-kicker">the kill test</div>
   <h2 class="sec">We tried to kill this product. Published, either way.</h2>
-  <p class="sec-sub">Before launch we pre-committed a kill bar: if the store can't beat a plain grep agent by 25% on hostile terrain, stop. Then we ran it — 12 Linux-kernel questions, answered twice by the <em>same</em> agent (grep-only vs store-first), every answer judged against source-derived ground truth <em>before</em> tokens counted. Measured 2026-07-12 · <a href="proof/">full write-up</a> · <a href="proof/questions.json">questions&nbsp;+&nbsp;keys (raw json)</a> · raw runs ship in the repo's <code>proof/</code>.</p>
+  <p class="sec-sub">Before launch we pre-committed a kill bar: if the store can't beat a plain grep-<em>and-read</em> agent by 25% on hostile terrain, stop. Then we ran it — 12 Linux-kernel questions, answered twice by the <em>same</em> agent (grep-and-read vs store-first — a real agent always reads, never just greps), every answer judged against source-derived ground truth <em>before</em> tokens counted. Measured 2026-07-12 · <a href="proof/">full write-up</a> · <a href="proof/questions.json">questions&nbsp;+&nbsp;keys (raw json)</a> · raw runs ship in the repo's <code>proof/</code>.</p>
 
   <div class="method reveal" style="margin-top:26px">
     <b>graphify headlines 71.5× — against pasting your entire repo into every prompt.</b> No agent does that. We threw the strawman out, tested against a real grep agent, and judged every answer before counting a token. Measured here: <b>−31.6% cost, deterministic, ~96ms queries (~4× graphify's).</b> A smaller honest number beats a big fake one.
@@ -448,11 +448,11 @@ ctx-optimize install --skills               <span class="c"># teach your coding 
   <div class="duo" style="margin-top:28px">
     <div class="pane was reveal">
       <span class="tag">what died</span>
-      <p><b>"Saves fresh tokens on a cached frontier agent" — dead.</b> Claude Code and Codex grep so well, and prompt caching absorbs every extra hop, that on raw input+output tokens the store is parity on locate/mechanism questions. Our bar was 25%; they came in at ~0%. We don't claim otherwise anywhere on this page.</p>
+      <p><b>"Cuts raw input+output tokens on a cached frontier agent" — dead.</b> Claude Code and Codex grep well, and prompt caching absorbs every extra hop, so on that one narrow metric the store is parity on locate/mechanism questions. We don't claim otherwise anywhere on this page. But raw tokens aren't the bill →</p>
     </div>
     <div class="pane now reveal">
       <span class="tag">what survived</span>
-      <p><b>Onboarding −34% to −49% tokens</b> on "trace the lifecycle" questions, both frontier CLIs. <b>Correctness:</b> grep arms of Codex and Devin named the wrong merge gatekeeper; Sonnet's grep arm reported a comment as a real caller — every store arm got it right via call edges. <b>Steps −13% to −29%</b> at every tier.</p>
+      <p><b>The real bill is cheaper.</b> Cache reads still bill (~10%), and fewer steps means fewer of them — so on each harness's own dollar report the store wins every Claude tier: <b>−9% to −16%</b>. Plus <b>onboarding −34% to −49% tokens</b>, <b>correctness</b> (grep arms of Codex and Devin named the wrong gatekeeper; the store arms didn't), and <b>−13% to −29% steps</b> everywhere.</p>
     </div>
   </div>
 
@@ -462,7 +462,7 @@ ctx-optimize install --skills               <span class="c"># teach your coding 
       <div class="b-head"><h4>Claude Code · default</h4><span class="b-files">linux/block · 98 files</span><span class="b-mult na">token parity</span></div>
       <div class="b-bars">
         <div class="b-line is-us"><span class="b-who">with store</span><div class="b-track"><div class="b-rail"><i class="us" style="width:99.8%"></i></div><em>370k</em></div></div>
-        <div class="b-line"><span class="b-who">grep only</span><div class="b-track"><div class="b-rail"><i class="them" style="width:100%"></i></div><em>370k</em></div></div>
+        <div class="b-line"><span class="b-who">grep+read</span><div class="b-track"><div class="b-rail"><i class="them" style="width:100%"></i></div><em>370k</em></div></div>
       </div>
       <p class="b-fine">steps <b>~flat</b> · wall <b>−14%</b> (347→298s) · quality <b>12/12 vs 11.5/12</b> — the best grep agent on earth doesn't need us for tokens</p>
     </div>
@@ -470,7 +470,7 @@ ctx-optimize install --skills               <span class="c"># teach your coding 
       <div class="b-head"><h4>Claude Code · Sonnet</h4><span class="b-files">linux slice · 3,987 files</span><span class="b-mult na">grep wins by 5%</span></div>
       <div class="b-bars">
         <div class="b-line is-us"><span class="b-who">with store</span><div class="b-track"><div class="b-rail"><i class="us" style="width:100%"></i></div><em>390k</em></div></div>
-        <div class="b-line"><span class="b-who">grep only</span><div class="b-track"><div class="b-rail"><i class="them" style="width:95%"></i></div><em>370k</em></div></div>
+        <div class="b-line"><span class="b-who">grep+read</span><div class="b-track"><div class="b-rail"><i class="them" style="width:95%"></i></div><em>370k</em></div></div>
       </div>
       <p class="b-fine">steps <b>−13%</b> · wall <b>+3%</b> (386→397s) · quality <b>11.5/12 vs 12/12</b> — the store arm was the only one to catch a comment posing as a real caller</p>
     </div>
@@ -478,7 +478,7 @@ ctx-optimize install --skills               <span class="c"># teach your coding 
       <div class="b-head"><h4>Claude Code · Haiku</h4><span class="b-files">linux slice · 3,987 files</span><span class="b-mult na">token parity</span></div>
       <div class="b-bars">
         <div class="b-line is-us"><span class="b-who">with store</span><div class="b-track"><div class="b-rail"><i class="us" style="width:98.9%"></i></div><em>284k</em></div></div>
-        <div class="b-line"><span class="b-who">grep only</span><div class="b-track"><div class="b-rail"><i class="them" style="width:100%"></i></div><em>287k</em></div></div>
+        <div class="b-line"><span class="b-who">grep+read</span><div class="b-track"><div class="b-rail"><i class="them" style="width:100%"></i></div><em>287k</em></div></div>
       </div>
       <p class="b-fine">steps <b>−29%</b> · wall <b>+9%</b> (641→698s) · quality <b>11/12 vs 11/12</b> — a third fewer hops, but caching makes hops free</p>
     </div>
@@ -486,7 +486,7 @@ ctx-optimize install --skills               <span class="c"># teach your coding 
       <div class="b-head"><h4>Codex CLI · default</h4><span class="b-files">linux/block · 98 files</span><span class="b-mult na">token parity</span></div>
       <div class="b-bars">
         <div class="b-line is-us"><span class="b-who">with store</span><div class="b-track"><div class="b-rail"><i class="us" style="width:100%"></i></div><em>397k</em></div></div>
-        <div class="b-line"><span class="b-who">grep only</span><div class="b-track"><div class="b-rail"><i class="them" style="width:97.1%"></i></div><em>386k</em></div></div>
+        <div class="b-line"><span class="b-who">grep+read</span><div class="b-track"><div class="b-rail"><i class="them" style="width:97.1%"></i></div><em>386k</em></div></div>
       </div>
       <p class="b-fine">steps <b>~flat</b> · wall <b>±0%</b> (683→680s) · quality <b>11.5/12 vs 11.5/12</b> — its grep arm named the wrong gatekeeper; the store arm didn't</p>
     </div>
@@ -494,7 +494,7 @@ ctx-optimize install --skills               <span class="c"># teach your coding 
       <div class="b-head"><h4>Devin CLI · SWE-1.6</h4><span class="b-files">linux/block · 98 files · n=6</span><span class="b-mult">−42% tokens</span></div>
       <div class="b-bars">
         <div class="b-line is-us"><span class="b-who">with store</span><div class="b-track"><div class="b-rail"><i class="us" style="width:57.5%"></i></div><em>2.30M</em></div></div>
-        <div class="b-line"><span class="b-who">grep only</span><div class="b-track"><div class="b-rail"><i class="them" style="width:100%"></i></div><em>4.00M</em></div></div>
+        <div class="b-line"><span class="b-who">grep+read</span><div class="b-track"><div class="b-rail"><i class="them" style="width:100%"></i></div><em>4.00M</em></div></div>
       </div>
       <p class="b-fine">steps <b>−24%</b> · wall <b>−34%</b> (294→195s) · quality <b>5/6 vs 6/6</b> · no prompt caching — every step re-pays full context, so saved steps become saved money · daily quota cut the run at 6 pairs</p>
     </div>
@@ -553,6 +553,19 @@ ctx-optimize install --skills               <span class="c"># teach your coding 
         <li><span class="m">✕</span><span><b>No telemetry.</b> Nothing leaves your machine unless you push it.</span></li>
       </ul>
     </div>
+  </div>
+</div></section>
+
+<hr class="sep">
+
+<section class="numbers" id="different"><div class="wrap">
+  <div class="sec-kicker">different by design</div>
+  <h2 class="sec">Not a graphify clone. A different bet.</h2>
+  <div class="reveal" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(232px,1fr));gap:16px;margin-top:36px">
+    <div class="method" style="margin:0"><b>Go, not Python.</b> One static binary, CGO-free, tree-sitter compiled to WASM. No runtime, no venv, no install pain — it just runs.</div>
+    <div class="method" style="margin:0"><b>Extensible without a fork.</b> Any language is a drop-in grammar pack; any data source — Postgres, Kafka, logs, docs — is a drop-in adapter script through one validated door. graphify's lanes are compiled in; you fork to extend.</div>
+    <div class="method" style="margin:0"><b>Performance-first.</b> 12k files gathered in 0.67s, queries in ~96ms, deterministic — and <b>no LLM at query time, ever</b>. graphify reaches for a model to name communities; we hand that back to your agent.</div>
+    <div class="method" style="margin:0"><b>Team sync, no server.</b> push/pull to any S3-compatible bucket — a teammate clones the repo and pulls the whole graph. Credentials are <code>${VAR}</code> names; values never touch disk.</div>
   </div>
 </div></section>
 
