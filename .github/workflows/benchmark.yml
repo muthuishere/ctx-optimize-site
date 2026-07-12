@@ -1,0 +1,78 @@
+name: benchmark
+
+# Public, reproducible proof. Installs the published ctx-optimize CLI (npm) and
+# graphify (pip), clones a small repo, builds both stores offline, and lets the
+# SAME model answer each question three ways over OpenRouter — shell,
+# ctx-optimize, graphify — reporting real time / tokens / cost. No product
+# source needed. The result table lands in the job summary; raw records upload
+# as an artifact.
+#
+# Runs on this PUBLIC repo, so the run is publicly viewable and forkable.
+# Manual (workflow_dispatch) only, so secrets are never exposed to PRs and it
+# only spends OpenRouter credit when a maintainer asks. Fork it, add your own
+# OPENROUTER_API_KEY secret, and click Run.
+
+on:
+  workflow_dispatch:
+    inputs:
+      model:
+        description: "OpenRouter model slug"
+        default: "openai/gpt-4o-mini"
+        required: true
+      repo:
+        description: "Repo to clone and benchmark (blank = default gorilla/mux)"
+        default: ""
+        required: false
+      name:
+        description: "Short name for the corpus (blank = default)"
+        default: ""
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "20"
+
+      - name: Install the published CLIs
+        run: |
+          npm i -g @muthuishere/ctx-optimize
+          pipx install graphifyy || python3 -m pip install --user graphifyy
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          ctx-optimize --version
+
+      - name: Run headless benchmark
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+        run: |
+          if [ -z "$OPENROUTER_API_KEY" ]; then
+            echo "::error::add an OPENROUTER_API_KEY secret to run this (Settings -> Secrets -> Actions)"
+            exit 1
+          fi
+          ARGS="--model '${{ inputs.model }}'"
+          if [ -n "${{ inputs.repo }}" ]; then ARGS="$ARGS --repo '${{ inputs.repo }}' --name '${{ inputs.name }}'"; fi
+          eval bash proof/agent/run-bench.sh $ARGS
+
+      - name: Publish result to job summary
+        if: always()
+        run: |
+          for f in proof/agent/results/SUMMARY-*.md; do
+            [ -f "$f" ] || continue
+            cat "$f" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+          done
+
+      - name: Upload raw records
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: benchmark-results
+          path: proof/agent/results/
+          if-no-files-found: warn
