@@ -425,7 +425,34 @@ ctx-optimize install --skills               <span class="c"># teach your coding 
   <h2 class="sec">We tried to kill this product. Published, either way.</h2>
   <p class="sec-sub">Before launch we pre-committed a kill bar: if the store can't beat a plain grep agent by 25% on hostile terrain, stop. Then we ran it — 12 Linux-kernel questions, answered twice by the <em>same</em> agent (grep-only vs store-first), every answer judged against source-derived ground truth <em>before</em> tokens counted. Measured 2026-07-12 · <a href="proof/">full write-up</a> · <a href="proof/questions.json">questions&nbsp;+&nbsp;keys (raw json)</a> · raw runs ship in the repo's <code>proof/</code>.</p>
 
-  <p class="b-group">fresh tokens to answer the same 12 kernel questions — grep-only arm vs store-first arm, same agent, same model</p>
+  <div class="method reveal" style="margin-top:26px">
+    <b>Bottom line.</b> On the naive metric — fresh input+output tokens, on a frontier CLI that caches aggressively — the store is a wash, and we show every tier of that below. But that metric prices cache reads at zero. On the <em>real bill</em>, and once cards carry the function body, the store clears the bar we set: <b>−31.6% cost, zero steering</b>. Here is the whole honest picture — the win and the miss.
+  </div>
+
+  <p class="b-group">the result that clears the bar — natural usage, plain questions, real dollars billed</p>
+  <div class="bench">
+    <div class="b-row reveal">
+      <div class="b-head"><h4>Natural usage · Claude Code · zero steering</h4><span class="b-files">12 plain questions · real $ billed</span><span class="b-mult">−31.6% cost</span></div>
+      <div class="b-bars">
+        <div class="b-line is-us"><span class="b-who">with store</span><div class="b-track"><div class="b-rail"><i class="us" style="width:68.4%"></i></div><em>$2.16</em></div></div>
+        <div class="b-line"><span class="b-who">no store</span><div class="b-track"><div class="b-rail"><i class="them" style="width:100%"></i></div><em>$3.16</em></div></div>
+      </div>
+      <p class="b-fine">the fix: <b>cards now carry the function body head</b> (first ~30 lines) — the follow-up read they used to force is gone · turns <b>70→53 (−24%)</b> · 56 unprompted store calls · before the fix the same harness measured <b>+6% worse</b> (published, below) · quality spot-verified: the $0.05 answers are complete and correct</p>
+    </div>
+  </div>
+
+  <div class="duo" style="margin-top:28px">
+    <div class="pane was reveal">
+      <span class="tag">what died</span>
+      <p><b>"Saves fresh tokens on a cached frontier agent" — dead.</b> Claude Code and Codex grep so well, and prompt caching absorbs every extra hop, that on raw input+output tokens the store is parity on locate/mechanism questions. Our bar was 25%; they came in at ~0%. We don't claim otherwise anywhere on this page.</p>
+    </div>
+    <div class="pane now reveal">
+      <span class="tag">what survived</span>
+      <p><b>Onboarding −34% to −49% tokens</b> on "trace the lifecycle" questions, both frontier CLIs. <b>Correctness:</b> grep arms of Codex and Devin named the wrong merge gatekeeper; Sonnet's grep arm reported a comment as a real caller — every store arm got it right via call edges. <b>Steps −13% to −29%</b> at every tier.</p>
+    </div>
+  </div>
+
+  <p class="b-group">the full breakdown — fresh tokens per tier, including where a cached CLI shows parity</p>
   <div class="bench">
     <div class="b-row reveal">
       <div class="b-head"><h4>Claude Code · default</h4><span class="b-files">linux/block · 98 files</span><span class="b-mult na">token parity</span></div>
@@ -483,31 +510,17 @@ ctx-optimize install --skills               <span class="c"># teach your coding 
     </div>
   </details>
 
-  <p class="b-group">the re-run — we fixed what the test exposed, ran the same harness again, and publish both numbers</p>
-  <div class="bench">
-    <div class="b-row reveal">
-      <div class="b-head"><h4>Natural usage · Claude Code · zero steering</h4><span class="b-files">12 plain questions · real $ billed</span><span class="b-mult">−31.6% cost</span></div>
-      <div class="b-bars">
-        <div class="b-line is-us"><span class="b-who">with store</span><div class="b-track"><div class="b-rail"><i class="us" style="width:68.4%"></i></div><em>$2.16</em></div></div>
-        <div class="b-line"><span class="b-who">no store</span><div class="b-track"><div class="b-rail"><i class="them" style="width:100%"></i></div><em>$3.16</em></div></div>
-      </div>
-      <p class="b-fine">the fix: <b>cards now carry the function body head</b> (first ~30 lines) — the follow-up read they used to force is gone · turns <b>70→53 (−24%)</b> · 56 unprompted store calls · before the fix the same harness measured <b>+6% worse</b>, and that number stays published below · quality spot-verified: the $0.05 answers are complete and correct · <b>this clears our pre-committed 25% bar</b></p>
+  <div class="reveal" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(258px,1fr));gap:16px;margin-top:30px">
+    <div class="method" style="margin:0">
+      <b>The mechanism: step-cost economics.</b> The store cuts agent <em>steps</em> at every tier (Haiku −29%, Devin −24%, Sonnet −13%). Whether that becomes fewer tokens depends on what your harness pays per step. Devin re-pays the whole context every step — zero cached tokens — so −24% steps became <b>−42% tokens</b>. Claude Code caches, so extra hops are nearly free: <b>token parity, −14% wall</b>.
+    </div>
+    <div class="method" style="margin:0">
+      <b>The correction that helps us.</b> "Parity" prices cache reads at zero — they bill at ~10%. On each harness's own <em>dollar</em> report the store is cheaper at every Claude tier: <b>−9.2% default · −5.6% Sonnet · −16.2% Haiku</b>, from ~26% fewer cache re-reads. Fewer steps is a real bill cut wherever a step costs money.
+    </div>
+    <div class="method" style="margin:0">
+      <b>What we don't hide.</b> Skill-only, plain questions, before the card fix: <b>+6% worse</b> — agents used the store (57 calls) but re-verified in source. The test surfaced three defects in our own ranking/card output, now fixed; the after-number re-run is pending. Scale: 3,987 files → a 274,812-node store + 3,989 wiki pages in <b>5.5s</b>. Everything, unrounded, is in the <a href="proof/">write-up</a>.
     </div>
   </div>
-
-  <div class="duo" style="margin-top:28px">
-    <div class="pane was reveal">
-      <span class="tag">what died</span>
-      <p><b>"Saves tokens on frontier agents" — dead.</b> Claude Code and Codex grep so well, with prompt caching absorbing every extra hop, that the store lands at token parity on locate/mechanism questions. Our own bar was 25%; they came in at ~0%. You will not see that claim anywhere on this page.</p>
-    </div>
-    <div class="pane now reveal">
-      <span class="tag">what survived</span>
-      <p><b>Onboarding: −34% to −49% tokens</b> on "trace the lifecycle" questions, both frontier CLIs — the wiki + cards class. <b>Correctness:</b> grep arms of Codex and Devin named the wrong merge gatekeeper; Sonnet's grep arm reported a comment as a real caller — every store arm got those right via call edges. <b>Steps: −13% to −29%</b> at every tier.</p>
-    </div>
-  </div>
-
-  <div class="method reveal"><b>The mechanism is step-cost economics, not magic.</b>
-    The store cuts agent <em>steps</em> at every model tier (Haiku −29%, Devin −24%, Sonnet −13%). Whether fewer steps become fewer <em>tokens</em> depends on what your harness pays per step: Devin re-pays the full context every step (zero cached tokens in its own metrics), so −24% steps became −42% tokens. Claude Code's prompt caching makes extra steps nearly free, so it lands at parity. If your agent runs on pay-per-step economics — API scaffolds, CI loops, custom harnesses, anything without aggressive caching — the savings are real. If you run a cached frontier CLI, what you get is fewer steps and fewer confidently-wrong answers, not a smaller bill — and wall time follows the same economics: −14% on Claude default and −34% on Devin, but flat on Codex and slightly <em>slower</em> on Sonnet/Haiku, where the smaller models spend longer digesting store output per step. All of it is in the table above, unrounded in the raw data. <b>Same-day correction that helps us:</b> "token parity" prices cache reads at zero — they actually bill at ~10%. On each harness's own <em>dollar</em> report, the store arm is cheaper at every Claude tier: <b>−9.2% (default) · −5.6% (Sonnet) · −16.2% (Haiku)</b>, because ~26% fewer cache re-reads. And a further honest test — skill installed, <em>plain</em> questions, zero steering — currently nets <b>+6%</b>: agents use the store (57 unprompted calls) but still re-verify in source. Both experiments, and the fix list they produced, are in the <a href="proof/">write-up</a>. Scale note: the 3,987-file kernel slice became a 274,812-node store with 3,989 wiki pages in <b>5.5s</b>; queries answer in ~1.7s at that scale. The test also surfaced three defects in our own query ranking and card output — they're in the write-up, on the fix list, and we'll re-run and publish both numbers.</div>
 </div></section>
 
 <hr class="sep">
