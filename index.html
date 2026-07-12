@@ -219,11 +219,19 @@ hr.sep{border:none;border-top:1px solid var(--border);max-width:1080px;margin:0 
   <p class="lede">ctx-optimize turns any repo into a queryable knowledge graph — <b>12,000 files in 0.67 seconds</b> — and answers your agent's questions in ~100ms, with citations. One static Go binary. <b>No LLM at query time, no database, no server.</b></p>
   <div class="cta">
     <a class="btn btn-primary" href="#getstart">Get started</a>
-    <a class="btn btn-ghost" href="#demo">Watch it answer</a>
+    <a class="btn btn-ghost" href="#watch">Watch it work</a>
   </div>
   <pre class="reveal herocmd"><span class="g">npm install -g @muthuishere/ctx-optimize</span>
 ctx-optimize init &amp;&amp; ctx-optimize add .   <span class="c"># then ask your agent anything</span></pre>
 </div></header>
+
+<section class="herodemo" id="watch" style="padding:80px 0 20px"><div class="wrap">
+  <div class="sec-kicker">watch it work · 55 seconds</div>
+  <h2 class="sec">Install, let Claude gather the repo, ask, and see what it saved.</h2>
+  <p class="sec-sub">One real session, unedited: Claude runs <code>ctx-optimize add</code> itself, answers a routing question straight from the store — with file-and-line citations — then the dashboard shows the tokens and dollars it saved.</p>
+  <video src="media/explainer.mp4" controls preload="metadata" poster="media/explainer-poster.jpg" playsinline class="reveal"></video>
+  <p class="cap">Narrated walkthrough · <code>gin-gonic/gin</code> · the answer and every metric are from this run</p>
+</div></section>
 
 <section class="getit" id="getstart" style="padding:70px 0 20px"><div class="wrap">
   <div class="sec-kicker">get started</div>
