@@ -201,6 +201,7 @@ hr.sep{border:none;border-top:1px solid var(--border);max-width:1080px;margin:0 
     <li><a href="#agent">Agent skills</a></li>
     <li><a href="#demo">Demo</a></li>
     <li><a href="#numbers">Benchmarks</a></li>
+    <li><a href="#proof">Kill test</a></li>
     <li><a href="#lineage">Lineage</a></li>
   </ul>
 </div></nav>
@@ -414,6 +415,42 @@ ctx-optimize install --skills               <span class="c"># teach your coding 
   </details>
   <div class="method reveal"><b>Methodology — read this before quoting the numbers.</b>
     graphify was timed on its <em>fastest</em> deterministic path (<code>update --no-cluster</code>: extraction only, no clustering, no LLM). ctx-optimize was timed on <code>add</code>, which does <em>more</em> work per run: extraction, graph build, stale-node pruning, and full wiki regeneration. Query latency is the median of 5 runs, same question, same 2,000-token budget, both CLIs invoked cold from the shell. Node counts are shown for scale, not equivalence — the tools disagree about what counts as a node (ctx-optimize graphs import modules and markdown documents as first-class nodes; graphify includes some file types we skip), which is why ctx-optimize shows ~34% more nodes on flask while the 12k-file totals land within 1%. On gin and on its own source graphify finds slightly more nodes and edges than we do, and we show that as-is. graphify also does things ctx-optimize deliberately does not: LLM-assisted community labeling and semantic clustering. If you want those, use graphify — the comparison here is the deterministic core both tools share.</div>
+</div></section>
+
+<hr class="sep">
+
+<section class="numbers" id="proof"><div class="wrap">
+  <div class="sec-kicker">the kill test</div>
+  <h2 class="sec">We tried to kill this product. Published, either way.</h2>
+  <p class="sec-sub">Before launch we pre-committed a kill bar: if the store can't beat a plain grep agent by 25% on hostile terrain, stop. Then we ran it — 12 Linux-kernel questions, answered twice by the <em>same</em> agent (grep-only vs store-first), every answer judged against source-derived ground truth <em>before</em> tokens counted. Measured 2026-07-12 · <a href="proof/RESULTS.md">full write-up</a> · <a href="proof/questions.json">questions&nbsp;+&nbsp;keys</a> · raw runs ship in the repo's <code>proof/</code>.</p>
+
+  <details class="rawtable reveal" open>
+    <summary>▸ the numbers — including the ones that don't flatter us</summary>
+    <div class="tablewrap">
+    <table>
+      <tr><th>harness · model</th><th>corpus</th><th>tokens, grep→store</th><th>steps</th><th>answer quality (grep vs store)</th></tr>
+      <tr><td>Claude Code · default</td><td>linux/block · 98 files</td><td>±0% — parity</td><td>~flat</td><td>12/12 vs 11.5/12</td></tr>
+      <tr><td>Claude Code · Sonnet</td><td>linux slice · 3,987 files</td><td>+5% — grep wins</td><td class="win">−13%</td><td>11.5/12 vs <b>12/12</b> — store arm more precise</td></tr>
+      <tr><td>Claude Code · Haiku</td><td>linux slice · 3,987 files</td><td>−1% — parity</td><td class="win">−29%</td><td>11/12 vs 11/12</td></tr>
+      <tr><td>Codex CLI · default</td><td>linux/block · 98 files</td><td>+3% — parity</td><td>~flat</td><td>11.5/12 vs 11.5/12</td></tr>
+      <tr><td>Devin CLI · SWE-1.6</td><td>linux/block · 98 files (n=6)</td><td class="win">−42%</td><td class="win">−24%</td><td>5/6 vs <b>6/6</b></td></tr>
+    </table>
+    </div>
+  </details>
+
+  <div class="duo" style="margin-top:28px">
+    <div class="pane was reveal">
+      <span class="tag">what died</span>
+      <p><b>"Saves tokens on frontier agents" — dead.</b> Claude Code and Codex grep so well, with prompt caching absorbing every extra hop, that the store lands at token parity on locate/mechanism questions. Our own bar was 25%; they came in at ~0%. You will not see that claim anywhere on this page.</p>
+    </div>
+    <div class="pane now reveal">
+      <span class="tag">what survived</span>
+      <p><b>Onboarding: −34% to −49% tokens</b> on "trace the lifecycle" questions, both frontier CLIs — the wiki + cards class. <b>Correctness:</b> grep arms of Codex and Devin named the wrong merge gatekeeper; Sonnet's grep arm reported a comment as a real caller — every store arm got those right via call edges. <b>Steps: −13% to −29%</b> at every tier.</p>
+    </div>
+  </div>
+
+  <div class="method reveal"><b>The mechanism is step-cost economics, not magic.</b>
+    The store cuts agent <em>steps</em> at every model tier (Haiku −29%, Devin −24%, Sonnet −13%). Whether fewer steps become fewer <em>tokens</em> depends on what your harness pays per step: Devin re-pays the full context every step (zero cached tokens in its own metrics), so −24% steps became −42% tokens. Claude Code's prompt caching makes extra steps nearly free, so it lands at parity. If your agent runs on pay-per-step economics — API scaffolds, CI loops, custom harnesses, anything without aggressive caching — the savings are real. If you run a cached frontier CLI, what you get is fewer steps, lower latency, and fewer confidently-wrong answers, not a smaller bill. Scale note: the 3,987-file kernel slice became a 274,812-node store with 3,989 wiki pages in <b>5.5s</b>; queries answer in ~1.7s at that scale. The test also surfaced three defects in our own query ranking and card output — they're in the write-up, on the fix list, and we'll re-run and publish both numbers.</div>
 </div></section>
 
 <hr class="sep">
