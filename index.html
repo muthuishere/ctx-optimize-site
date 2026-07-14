@@ -358,7 +358,7 @@ ctx-optimize init --scan --yes && add .      <span class="c"># one store per mod
 <section class="numbers" id="numbers"><div class="wrap">
   <div class="sec-kicker">all the numbers</div>
   <h2 class="sec">Benchmarks, with the parts that don't flatter us.</h2>
-  <p class="sec-sub">Measured 2026-07-11 · Apple M5 Pro (18 cores, 48&nbsp;GB) · graphify 0.9.12 vs a ctx-optimize dev build · <a href="bench/results.json">raw data</a>.</p>
+  <p class="sec-sub">Head-to-head vs <b>graphify</b> — the one rival we've run the full measured harness against. Measured 2026-07-11 · Apple M5 Pro (18 cores, 48&nbsp;GB) · graphify 0.9.12 vs a ctx-optimize dev build · <a href="bench/results.json">raw data</a>. How we stack up against <b>CodeGraph, GitNexus, potpie &amp; Serena</b> — on architecture, setup, and their own published numbers — is on <a href="compare.html">the comparison</a>.</p>
   <p class="b-group">cold gather — full extraction, bars scaled per corpus</p>
   <div class="bench">
     <div class="b-row reveal">
@@ -597,13 +597,15 @@ ctx-optimize init --scan --yes && add .      <span class="c"># one store per mod
 
 <section class="numbers" id="different"><div class="wrap">
   <div class="sec-kicker">different by design</div>
-  <h2 class="sec">Not a graphify clone. A different bet.</h2>
+  <h2 class="sec">Not a clone of any of them. A different bet.</h2>
+  <p class="sec-sub">The lane has graph-DB tools (CodeGraph on SQLite, GitNexus on an embedded DB, potpie on Neo4j), a Python central-store (graphify), and a live language-server (Serena). We're the one that's <b>a single static binary you extend</b> — here's what that changes versus the whole field.</p>
   <div class="reveal" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(232px,1fr));gap:16px;margin-top:36px">
-    <div class="method" style="margin:0"><b>Go, not Python.</b> One static binary, CGO-free, tree-sitter compiled to WASM. No runtime, no venv, no install pain — it just runs.</div>
-    <div class="method" style="margin:0"><b>Extensible without a fork.</b> Any language is a drop-in grammar pack; any data source — Postgres, Kafka, logs, docs — is a drop-in adapter script through one validated door. graphify's lanes are compiled in; you fork to extend.</div>
-    <div class="method" style="margin:0"><b>Performance-first.</b> 12k files gathered in 0.67s, queries in ~96ms, deterministic — and <b>no LLM at query time, ever</b>. graphify reaches for a model to name communities; we hand that back to your agent.</div>
-    <div class="method" style="margin:0"><b>Team sync, no server.</b> push/pull to any S3-compatible bucket — a teammate clones the repo and pulls the whole graph. Credentials are <code>${VAR}</code> names; values never touch disk.</div>
+    <div class="method" style="margin:0"><b>One binary — no store to run.</b> CGO-free Go, tree-sitter compiled to WASM. Nothing to stand up: no SQLite file, no LadybugDB, no Neo4j service, no Python venv, no language server per language. <code>npm i -g</code> and it runs, offline.</div>
+    <div class="method" style="margin:0"><b>Deterministic — no model, ever.</b> CodeGraph and GitNexus are structural like us; graphify reaches for an LLM to label communities and potpie keeps one in the loop. We hand all semantics to the agent you already run — zero API keys, reproducible every time.</div>
+    <div class="method" style="margin:0"><b>Extensible without a fork.</b> A new language is a drop-in grammar pack; a framework's routes, a build tool's deps, Postgres, Kafka, logs — drop-in route/manifest packs and adapter scripts through one validated door. No other tool here lets you add a recognizer as a committed JSON file.</div>
+    <div class="method" style="margin:0"><b>More than code, in one graph.</b> Routes→handlers, dependencies that federate across build tools, k8s topology, git co-change, subsystems. Serena has no persistent graph; the graph-DB tools mostly stop at code. And team sync is push/pull to any S3 bucket — no server.</div>
   </div>
+  <p class="sec-sub" style="margin-top:28px">The full board — where every rival wins and where we lose, with numbers — is on <a href="compare.html">the honest comparison</a>.</p>
 </div></section>
 
 <hr class="sep">

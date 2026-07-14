@@ -147,19 +147,38 @@ footer a{color:var(--muted)}
 </div></section>
 
 <section class="doc" id="performance"><div class="wrap">
-  <div class="sec-kicker">performance · our measured numbers</div>
-  <h2 class="sec">Speed is the part we can already prove.</h2>
-  <p class="body">These are <b>our</b> reproducible measurements (single M-class laptop, cold caches) — not a head-to-head yet. The cross-tool harness (<code>proof/compare/</code>) that runs every tool on the same repos is still being built; when it lands, the losing rows go here too. What we can show today:</p>
+  <div class="sec-kicker">performance · where we beat</div>
+  <h2 class="sec">Two kinds of numbers: what we measured, and what's structurally true of everyone.</h2>
+
+  <h3 class="sub">1. Setup &amp; footprint — true for every rival, by architecture</h3>
+  <p class="body">You don't need a benchmark to count dependencies. This is the win we hold against the <i>whole</i> field, not just one tool — the deterministic single binary carries none of the runtime cost a graph-DB, a model, or a language-server does:</p>
   <div class="tablewrap"><table>
-    <tr><th>operation</th><th>repo</th><th>result</th><th>note</th></tr>
-    <tr><td>Cold gather</td><td>12,484 files</td><td class="win">0.67 s</td><td>includes building the full markdown wiki</td></tr>
-    <tr><td>Cold gather</td><td>Chromium (~1.5M nodes)</td><td class="win">minutes, once</td><td>1.49M nodes / 3.7M edges, then incremental forever</td></tr>
-    <tr><td>Query latency</td><td>Chromium store</td><td class="win">&lt; 1 s</td><td>lexical IDF + prefix + trigram, no model call</td></tr>
-    <tr><td>Incremental re-gather</td><td>changed files only</td><td class="win">sub-second</td><td>content-hash manifest; unchanged = 0 work</td></tr>
-    <tr><td>Federated query</td><td>beam monorepo, 188K nodes</td><td class="win">≈ 0.6 s</td><td>across all module stores at the root</td></tr>
-    <tr><td>Setup / first answer</td><td>any repo</td><td class="win">seconds</td><td>no DB daemon, no model key, no index server to start</td></tr>
+    <tr><th>&nbsp;</th><th>ctx-optimize</th><th>CodeGraph</th><th>GitNexus</th><th>graphify</th><th>potpie</th><th>Serena</th></tr>
+    <tr><td>Services to run</td><td class="win">0</td><td>SQLite (embedded)</td><td>embedded DB</td><td class="mid">Python runtime</td><td class="lose">Neo4j</td><td class="mid">LSP / language</td></tr>
+    <tr><td>Model / API key</td><td class="win">none</td><td class="win">none</td><td class="win">none</td><td class="mid">for labeling</td><td class="lose">LLM in loop</td><td class="win">none</td></tr>
+    <tr><td>Install</td><td class="win">1 static binary</td><td>binary + index</td><td>binary</td><td class="mid">pip + deps</td><td class="lose">containers</td><td class="mid">server + LSPs</td></tr>
+    <tr><td>Works fully offline</td><td class="win">yes</td><td class="win">yes</td><td class="win">yes</td><td class="mid">not for labeling</td><td class="lose">no</td><td class="win">yes</td></tr>
+    <tr><td>Cold start → first answer</td><td class="win">seconds</td><td>seconds</td><td>seconds</td><td class="mid">index + model</td><td class="lose">DB bring-up</td><td class="mid">LSP warmup</td></tr>
   </table></div>
-  <p class="body">For reference, competitors publish their own figures — CodeGraph cites <i>58% fewer tool calls, 22% faster, near-zero file reads</i>; graphify and GitNexus quote large token savings. Those are their numbers, measured their way. The honest thing we can say next to ours: <b>the deterministic, no-model, no-DB path removes whole categories of latency and setup cost that a graph-DB or model-assisted tool carries</b> — and that's exactly what the cross-tool harness will quantify, wins and losses alike. Raw data behind our numbers: <a href="https://muthuishere.github.io/ctx-optimize-site/proof/agent/">proof/agent</a> and <a href="bench/results.json">bench/results.json</a>.</p>
+
+  <h3 class="sub">2. Measured head-to-head — graphify (the one we've fully run)</h3>
+  <p class="body">The cross-tool harness (<code>proof/compare/</code>) that runs CodeGraph, GitNexus, potpie and Serena on the same repos is still being built — so for a real, apples-to-apples number today we only claim graphify, on the deterministic core both tools share (M5 Pro, cold shell, <a href="bench/results.json">raw data</a>):</p>
+  <div class="tablewrap"><table>
+    <tr><th>operation</th><th>corpus</th><th>ctx-optimize vs graphify</th><th>note</th></tr>
+    <tr><td>Cold gather</td><td>graphify source, 12,484 files</td><td class="win">13.3× faster</td><td>store 8.3 MB vs 30.1 MB — 3.6× smaller; nodes within 1%</td></tr>
+    <tr><td>Cold gather</td><td>gin, 159 files</td><td class="win">2.2× faster</td><td>graphify finds slightly more nodes here — shown as-is</td></tr>
+    <tr><td>Query latency</td><td>12k-file corpus, median of 5</td><td class="win">~4× faster</td><td>3.8–4.1× across three questions, 2,000-token budget</td></tr>
+  </table></div>
+  <p class="body">Honest caveats, same as on the <a href="index.html#numbers">benchmarks page</a>: graphify was timed on its fastest deterministic path (no clustering, no LLM); on gin and its own source it finds a few more nodes than we do, shown as-is; and it does things we deliberately don't (LLM community labeling). This is the shared core, not a claim we win at everything.</p>
+
+  <h3 class="sub">3. Our absolute numbers + their published claims</h3>
+  <div class="tablewrap"><table>
+    <tr><th>ours (measured)</th><th>result</th><th>theirs (their claim)</th></tr>
+    <tr><td>Cold gather, 12,484 files</td><td class="win">0.67 s</td><td>CodeGraph: <i>58% fewer tool calls, 22% faster</i></td></tr>
+    <tr><td>Query, 1.49M-node Chromium store</td><td class="win">&lt; 1 s</td><td>GitNexus / graphify: <i>large token savings</i></td></tr>
+    <tr><td>Federated query, 188K-node monorepo</td><td class="win">≈ 0.6 s</td><td>(measured their way, not ours)</td></tr>
+  </table></div>
+  <p class="body">When the full harness lands, every rival gets a measured row here — including the ones where we lose. Until then we won't fake a head-to-head we haven't run. Raw data behind ours: <a href="https://muthuishere.github.io/ctx-optimize-site/proof/agent/">proof/agent</a> · <a href="bench/results.json">bench/results.json</a>.</p>
 </div></section>
 
 <section class="doc" id="each"><div class="wrap">
