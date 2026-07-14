@@ -92,6 +92,7 @@ footer a{color:var(--muted)}
   <div class="logo"><a href="index.html" style="color:inherit;text-decoration:none">ctx-<em>optimize</em></a></div>
   <ul>
     <li><a href="#install">Install</a></li>
+    <li><a href="#v03">New in v0.3</a></li>
     <li><a href="#cli">CLI</a></li>
     <li><a href="#repo-config">Repo config</a></li>
     <li><a href="#global-config">Global config</a></li>
@@ -108,6 +109,7 @@ footer a{color:var(--muted)}
   <div class="toc">
     <a href="#install">Install</a>
     <a href="#quickstart">Quickstart</a>
+    <a href="#v03">New in v0.3</a>
     <a href="#cli">CLI reference</a>
     <a href="#repo-config">Repo config</a>
     <a href="#global-config">Global config</a>
@@ -155,6 +157,38 @@ ctx-optimize add .                 <span class="c"># parallel fan-out: one store
 ctx-optimize query "where is auth"
 ctx-optimize card HandleCheckout   <span class="c"># signature + doc + callers + callees, no file read</span>
 ctx-optimize affected PaymentService --depth 2</pre>
+</div></section>
+
+<section class="doc" id="v03"><div class="wrap">
+  <div class="sec-kicker">new in v0.3</div>
+  <h2 class="sec">Routes, dependencies, subsystems, co-change — and a real dashboard.</h2>
+  <p class="sec-sub">Every one of these is deterministic pure-Go extraction over the ASTs and git history we already hold — no model, no network, same contract.</p>
+
+  <h3 class="sub">Framework routes — the edge grep can't produce</h3>
+  <p class="body">Routing declarations become <code>route</code> nodes linked by <code>handles</code> edges to their handlers, so <code>affected &lt;handler&gt;</code> surfaces the URL that binds it and <code>query "GET /users"</code> finds the endpoint. Core recognizers: <b>FastAPI, Flask, Express, NestJS, Angular, React Router, Vue Router</b> (from source) and <b>OpenAPI, Drupal <code>*.routing.yml</code>, Kubernetes Ingress</b> (from YAML). Edges are <code>INFERRED</code> with a <code>synthesized_by</code> channel tag — honest provenance. Anything call-shaped that isn't core is a <b>route pack</b> (see below).</p>
+
+  <h3 class="sub">The manifest lane — dependencies + K8s as graph</h3>
+  <p class="body">Build manifests become a dependency graph: <b>package.json, pom.xml, *.csproj/*.sln (ProjectReference = the .NET module graph), go.mod, build.gradle</b>. A dependency is a version-free node (<code>dep:maven/org.apache.kafka:kafka-clients</code>) with the version on the edge — so the <i>same</i> library declared by a Maven module and a Gradle module federates to <b>one node</b>, and <code>affected dep:npm/express</code> lists every module that uses it. <b>Kubernetes</b> manifests become topology: resource nodes (<code>k8s://ns/kind/name</code>), Service→Deployment <code>selects</code> (label match), Ingress→Service, ConfigMap mounts, image refs. Secret resources: node only, data never read; Helm templates skipped.</p>
+
+  <h3 class="sub">Community-detected subsystems</h3>
+  <p class="body">The wiki now opens with a <b>Subsystems</b> table — deterministic community detection clusters the graph into architecture neighborhoods ("this repo is 6 subsystems"), each with its top hubs and dominant directories. Regenerated on every add, byte-stable.</p>
+
+  <h3 class="sub">Git-history co-change edges</h3>
+  <p class="body">From <code>git log</code> alone (zero parsing): <code>co_changed_with</code> edges between files that historically change together, with support counts. Answers what no AST can — "what usually breaks with this?" — and the strongest signals are often <b>code↔doc</b> couplings a parser could never see.</p>
+
+  <h3 class="sub">Pack doctrine — extend routes and manifests like grammars</h3>
+  <p class="body">Core stays embedded; everything else is a drop-in JSON pack, discovered at add time from <code>.ctxoptimize/routes/</code> (or <code>manifests/</code>) in the repo and <code>~/ctxoptimize/routes/</code> on the machine — repo wins on collision, malformed packs fail loudly.</p>
+  <pre class="block"><span class="c"># route pack: teach it your team's own registerRoute(path, handler) convention</span>
+ctx-optimize routes add myframework            <span class="c"># scaffold .ctxoptimize/routes/myframework.json</span>
+ctx-optimize routes add https://github.com/org/route-packs
+ctx-optimize routes list                       <span class="c"># core channels + discovered packs</span>
+
+<span class="c"># manifest packs work the same way (declarative path selectors over json/xml/yaml)</span>
+ctx-optimize manifests add internal-deps
+ctx-optimize manifests list</pre>
+
+  <h3 class="sub">First-class dashboard</h3>
+  <p class="body"><code>ctx-optimize serve</code> is now a full React app (embedded, zero external requests): <b>Repos</b> (freshness, counts), <b>Onboard</b> (scan → confirm → add with live progress), <b>Query</b>, <b>Viewer</b> (force-directed graph, budgeted, click-to-expand neighborhoods), <b>Settings</b> (every config key + pack across all four axes, editable), <b>Changes</b> (the audit feed). All mutations run through the CLI's own validated doors, loopback-only even if <code>--host</code> is widened, and every change is written to an append-only <code>audit.ndjson</code> — read it with <code>ctx-optimize log</code>.</p>
 </div></section>
 
 <section class="doc" id="cli"><div class="wrap">
