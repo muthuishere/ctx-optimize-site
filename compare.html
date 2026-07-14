@@ -103,6 +103,7 @@ footer a{color:var(--muted)}
     <li><a href="index.html">Home</a></li>
     <li><a href="docs.html">Docs</a></li>
     <li><a href="#table">The table</a></li>
+    <li><a href="#performance">Performance</a></li>
     <li><a href="#each">Each rival</a></li>
     <li><a href="#bet">Our bet</a></li>
     <li><a href="https://github.com/muthuishere/ctx-optimize">GitHub</a></li>
@@ -132,16 +133,33 @@ footer a{color:var(--muted)}
     <tr><td>Adoption (approx)</td><td class="lose">new</td><td class="win">~47K★</td><td class="win">~42K★</td><td class="win">~82K★</td><td>funded</td><td>established</td></tr>
     <tr><td>Runtime</td><td class="win">one static Go binary</td><td>SQLite</td><td>embedded DB</td><td>Python</td><td class="lose">Neo4j service</td><td>language servers</td></tr>
     <tr><td>Setup deps</td><td class="win">zero</td><td class="win">zero (1 file)</td><td class="win">zero</td><td class="mid">model key</td><td class="lose">DB + infra</td><td class="mid">LSP per lang</td></tr>
-    <tr><td>MCP server</td><td class="lose">not yet</td><td class="win">42 tools</td><td class="win">16 tools</td><td class="mid">partial</td><td class="win">yes</td><td class="win">yes</td></tr>
-    <tr><td>Agent reach today</td><td>skill + hook (CC/Codex/Copilot/Devin)</td><td class="win">8 hosts via MCP</td><td class="win">MCP hosts</td><td>skill</td><td>API</td><td class="win">MCP hosts</td></tr>
+    <tr><td>Distribution</td><td class="win">agent skill + hook</td><td>MCP (42 tools)</td><td>MCP (16 tools)</td><td>skill</td><td>API</td><td>MCP</td></tr>
+    <tr><td>Agent reach</td><td>CC / Codex / Copilot / Devin</td><td class="win">8 hosts via MCP</td><td class="win">MCP hosts</td><td>skill</td><td>API</td><td class="win">MCP hosts</td></tr>
     <tr><td>Determinism</td><td class="win">no model, ever</td><td class="win">structural</td><td class="win">structural</td><td class="mid">model-assisted</td><td class="lose">LLM in loop</td><td class="win">LSP-exact</td></tr>
-    <tr><td>Call-edge precision</td><td class="mid">name-matched</td><td>graph</td><td>graph</td><td>graph</td><td>graph</td><td class="win">LSP-exact</td></tr>
+    <tr><td>Extraction engine</td><td class="win">tree-sitter AST</td><td>AST</td><td>AST</td><td>AST</td><td>AST</td><td class="win">language server</td></tr>
+    <tr><td>Call-edge precision</td><td>AST + conservative name-resolve</td><td>AST name-resolve</td><td>AST name-resolve</td><td>AST name-resolve</td><td>AST name-resolve</td><td class="win">LSP type-exact</td></tr>
     <tr><td>Freshness / staleness gate</td><td class="win">git-HEAD gate</td><td class="win">auto-sync</td><td>sync</td><td class="lose">static dump</td><td>re-index</td><td class="win">live</td></tr>
     <tr><td>Routes / deps / k8s as graph</td><td class="win">yes (v0.3)</td><td class="win">routes+bridges</td><td class="mid">partial</td><td class="lose">no</td><td>no</td><td class="lose">no</td></tr>
     <tr><td>Extensible without forking</td><td class="win">packs (4 axes)</td><td class="mid">config</td><td class="mid">config</td><td>plugins</td><td>no</td><td class="lose">no</td></tr>
     <tr><td>License</td><td class="win">MIT</td><td class="win">MIT</td><td class="lose">noncommercial</td><td>open</td><td>open-core</td><td class="win">MIT</td></tr>
   </table></div>
   <p class="body"><span class="win">green</span> = a genuine strength, <span class="mid">amber</span> = partial / caveated, <span class="lose">red</span> = a real weakness. Notice ours has red in it. The most important red is <b>MCP</b> — see "our bet."</p>
+</div></section>
+
+<section class="doc" id="performance"><div class="wrap">
+  <div class="sec-kicker">performance · our measured numbers</div>
+  <h2 class="sec">Speed is the part we can already prove.</h2>
+  <p class="body">These are <b>our</b> reproducible measurements (single M-class laptop, cold caches) — not a head-to-head yet. The cross-tool harness (<code>proof/compare/</code>) that runs every tool on the same repos is still being built; when it lands, the losing rows go here too. What we can show today:</p>
+  <div class="tablewrap"><table>
+    <tr><th>operation</th><th>repo</th><th>result</th><th>note</th></tr>
+    <tr><td>Cold gather</td><td>12,484 files</td><td class="win">0.67 s</td><td>includes building the full markdown wiki</td></tr>
+    <tr><td>Cold gather</td><td>Chromium (~1.5M nodes)</td><td class="win">minutes, once</td><td>1.49M nodes / 3.7M edges, then incremental forever</td></tr>
+    <tr><td>Query latency</td><td>Chromium store</td><td class="win">&lt; 1 s</td><td>lexical IDF + prefix + trigram, no model call</td></tr>
+    <tr><td>Incremental re-gather</td><td>changed files only</td><td class="win">sub-second</td><td>content-hash manifest; unchanged = 0 work</td></tr>
+    <tr><td>Federated query</td><td>beam monorepo, 188K nodes</td><td class="win">≈ 0.6 s</td><td>across all module stores at the root</td></tr>
+    <tr><td>Setup / first answer</td><td>any repo</td><td class="win">seconds</td><td>no DB daemon, no model key, no index server to start</td></tr>
+  </table></div>
+  <p class="body">For reference, competitors publish their own figures — CodeGraph cites <i>58% fewer tool calls, 22% faster, near-zero file reads</i>; graphify and GitNexus quote large token savings. Those are their numbers, measured their way. The honest thing we can say next to ours: <b>the deterministic, no-model, no-DB path removes whole categories of latency and setup cost that a graph-DB or model-assisted tool carries</b> — and that's exactly what the cross-tool harness will quantify, wins and losses alike. Raw data behind our numbers: <a href="https://muthuishere.github.io/ctx-optimize-site/proof/agent/">proof/agent</a> and <a href="bench/results.json">bench/results.json</a>.</p>
 </div></section>
 
 <section class="doc" id="each"><div class="wrap">
@@ -184,10 +202,10 @@ footer a{color:var(--muted)}
     <li class="up"><span class="m">+</span><span><b>Extend without forking.</b> Routes, manifests, languages, and any data source are drop-in packs/adapters — commit the file, the whole team's agents inherit it. No other tool here lets you add a framework recognizer as a committed JSON file.</span></li>
     <li class="up"><span class="m">+</span><span><b>Honest provenance + freshness.</b> Every edge is <code>EXTRACTED</code> (parsed) or <code>INFERRED</code> (name-matched); <code>fresh</code> gates answers against git HEAD so the agent never trusts a stale graph.</span></li>
     <li class="up"><span class="m">+</span><span><b>More than code.</b> Routes→handlers, dependencies that federate across build tools, k8s topology, git co-change, community subsystems — in one graph, one query.</span></li>
-    <li class="down"><span class="m">−</span><span><b>No MCP server yet — our real gap.</b> Our skill+hook reaches Claude Code, Codex, Copilot and Devin, but MCP-only hosts (Cursor, Kiro, Gemini CLI, generic clients) can't see us at all. MCP is how the two leaders won the category, and not shipping it is an adoption ceiling, not a purity badge. It's specced and next (stdio, read-only, still stdlib-only — the determinism doesn't change).</span></li>
-    <li class="down"><span class="m">−</span><span><b>Call edges are name-matched, not LSP-exact.</b> Serena is more precise here. Exact edges (go/x/tools first) are on the roadmap.</span></li>
+    <li class="up"><span class="m">±</span><span><b>Agent skill over MCP — a deliberate bet.</b> The leaders distribute over MCP; we bet on the <b>agent-skill + hook + committed pointer</b> path instead. A skill is richer than a fixed MCP tool list — it teaches the agent <i>when</i> and <i>how</i> to use the store, carries the query-craft rules, and drives onboarding and customization end-to-end. The tradeoff, stated plainly: on MCP-only hosts (Cursor, Kiro, Gemini CLI) you'd wire the CLI in yourself — there's no MCP server, by choice, and there won't be one. On Claude Code, Codex, Copilot and Devin the skill lands the moment you run <code>install --skills</code>.</span></li>
+    <li class="down"><span class="m">−</span><span><b>Call edges are conservative, not LSP-exact.</b> We parse with tree-sitter (real ASTs, same engine class as CodeGraph/GitNexus/graphify) and resolve a call to its declaration by unique name — <b>dropping ambiguous matches rather than guessing</b>, so there are no false edges. That's the same precision tier as the other graph tools; only Serena's language server is genuinely type-exact (it knows the exact overload). Closing that last gap (go/x/tools first) is on the roadmap.</span></li>
   </ul>
-  <div class="note"><b>The honest summary:</b> if you want the most-adopted, MCP-everywhere tool today, that's CodeGraph or GitNexus. If you want a company-safe license, avoid GitNexus. If you want symbol-exact refactors, add Serena. If you want <b>one zero-dependency binary that indexes code + routes + dependencies + infra deterministically and lets your team extend it without a fork</b> — and you're on Claude Code / Codex / Copilot / Devin today, with MCP coming — that's us. We'd rather earn the comparison than hide from it.</p></div>
+  <div class="note"><b>The honest summary:</b> if you want the most-adopted, MCP-everywhere tool today, that's CodeGraph or GitNexus. If you want a company-safe license, avoid GitNexus. If you want symbol-exact refactors, add Serena. If you want <b>one zero-dependency binary that indexes code + routes + dependencies + infra deterministically and lets your team extend it without a fork</b>, delivered to your agent as a skill rather than an MCP server, on Claude Code / Codex / Copilot / Devin — that's us. We'd rather earn the comparison than hide from it.</p></div>
 </div></section>
 
 <footer><div class="wrap">
