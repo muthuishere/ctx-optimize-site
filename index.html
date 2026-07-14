@@ -243,7 +243,7 @@ ctx-optimize init && ctx-optimize add .     <span class="c"># gather this repo �
 ctx-optimize install --skills               <span class="c"># teach your coding agent to answer from the store</span></pre>
   <p class="sec-sub" style="margin-top:16px">Monorepo? One more command finds every project first:</p>
   <pre class="reveal" style="margin-top:12px"><span class="g">ctx-optimize scan</span>                           <span class="c"># lists every project it found (read-only)</span>
-ctx-optimize init --scan --yes && add .      <span class="c"># one store per module + a navigator</span></pre>
+ctx-optimize init --scan --yes && ctx-optimize add .   <span class="c"># one store per module + a navigator</span></pre>
   <p class="sec-sub" style="margin-top:16px">Source and tests in <b>separate folders</b> (the .NET / Gradle case)? Declare one module across both — they share a graph, and test→source calls resolve across the split:</p>
   <pre class="reveal" style="margin-top:12px"><span class="c"># .ctxoptimize/config.json</span>
 "modules": [{ <span class="g">"name"</span>: "Billing", <span class="g">"paths"</span>: [<span class="g">"src/Billing"</span>, <span class="g">"tests/Billing.Tests"</span>] }]</pre>
