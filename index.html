@@ -224,8 +224,8 @@ hr.sep{border:none;border-top:1px solid var(--border);max-width:1080px;margin:0 
     <a class="btn btn-ghost" href="#watch">Watch it work</a>
   </div>
   <pre class="reveal herocmd"><span class="g">npm install -g @muthuishere/ctx-optimize</span>
-ctx-optimize init &amp;&amp; ctx-optimize add .   <span class="c"># gather the repo</span>
-ctx-optimize install --skills            <span class="c"># teach your agent to use it — then ask anything</span></pre>
+ctx-optimize install --skills            <span class="c"># one-time: teach your agent (global)</span>
+cd your-repo &amp;&amp; ctx-optimize init &amp;&amp; ctx-optimize add .   <span class="c"># gather it — then ask anything</span></pre>
 </div></header>
 
 <section class="herodemo" id="watch" style="padding:80px 0 20px"><div class="wrap">
@@ -240,8 +240,8 @@ ctx-optimize install --skills            <span class="c"># teach your agent to u
   <div class="sec-kicker">get started</div>
   <h2 class="sec">Three commands to a smarter agent.</h2>
   <pre class="reveal"><span class="g">npm install -g @muthuishere/ctx-optimize</span>   <span class="c"># one static binary per platform, no postinstall downloads</span>
-ctx-optimize init && ctx-optimize add .     <span class="c"># gather this repo — about a second</span>
-ctx-optimize install --skills               <span class="c"># teach your coding agent to answer from the store</span></pre>
+ctx-optimize install --skills               <span class="c"># one-time: teach your coding agent to answer from the store</span>
+cd your-repo && ctx-optimize init && ctx-optimize add .   <span class="c"># gather this repo — about a second</span></pre>
   <p class="sec-sub" style="margin-top:16px">Monorepo? One more command finds every project first:</p>
   <pre class="reveal" style="margin-top:12px"><span class="g">ctx-optimize scan</span>                           <span class="c"># lists every project it found (read-only)</span>
 ctx-optimize init --scan --yes && ctx-optimize add .   <span class="c"># one store per module + a navigator</span></pre>
@@ -619,8 +619,8 @@ ctx-optimize init --scan --yes && ctx-optimize add .   <span class="c"># one sto
   <div class="sec-kicker">install</div>
   <h2 class="sec">Convinced? It's still three commands.</h2>
   <pre class="reveal"><span class="g">npm install -g @muthuishere/ctx-optimize</span>
-ctx-optimize init && ctx-optimize add .
-ctx-optimize install --skills   <span class="c"># teaches your coding agent to use the store</span></pre>
+ctx-optimize install --skills   <span class="c"># one-time: teaches your coding agent to use the store</span>
+cd your-repo && ctx-optimize init && ctx-optimize add .</pre>
   <p class="sec-sub" style="margin-top:22px">Every command and every config key — repo config, machine-global config, monorepos, remotes, adapters, route/manifest/grammar packs — on one page: <a href="docs.html">the docs</a>. See where we stand against the field, honestly: <a href="compare.html">the comparison</a>.</p>
 </div></section>
 
