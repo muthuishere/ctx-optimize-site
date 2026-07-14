@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ctx-optimize docs — every command, every config key</title>
+<meta name="description" content="The complete ctx-optimize reference: CLI commands, repo config (.ctxoptimize/config.json), machine-global config, multi-module monorepos, remotes, adapters, grammar packs.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0c10; --bg2:#0f1319; --panel:#141a22; --border:#1f2833; --border2:#2b3644;
+  --text:#e8edf4; --muted:#94a3b8; --dim:#64748b;
+  --accent:#4ade80; --accent-dim:#166534; --contrast:#f87171;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --sans:"Inter",-apple-system,BlinkMacSystemFont,sans-serif;
+  --disp:"Space Grotesk","Inter",sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.65;font-size:16px;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin:0 auto;padding:0 40px}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+code{font-family:var(--mono);font-size:.92em;background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:.1em .4em}
+::selection{background:var(--accent-dim);color:#fff}
+
+nav{position:sticky;top:0;z-index:50;background:rgba(10,12,16,.82);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;height:60px}
+.logo{font-family:var(--disp);font-weight:700;font-size:1.1rem;color:var(--text)}
+.logo em{color:var(--accent);font-style:normal}
+nav ul{display:flex;gap:28px;list-style:none}
+nav ul a{color:var(--muted);font-size:.88rem;font-weight:500}
+nav ul a:hover{color:var(--text);text-decoration:none}
+
+.hero{padding:64px 0 20px;position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:0;background:radial-gradient(900px 420px at 70% -10%,rgba(74,222,128,.09),transparent 60%);pointer-events:none}
+.kicker{font-family:var(--mono);font-size:.82rem;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:22px}
+h1{font-family:var(--disp);font-weight:700;font-size:clamp(2rem,4.6vw,3.2rem);line-height:1.06;letter-spacing:-.025em;max-width:820px}
+h1 .ghost{color:var(--dim)}
+.lede{margin-top:22px;font-size:1.12rem;color:var(--muted);max-width:680px}
+.lede b{color:var(--text);font-weight:600}
+
+.sec-kicker{font-family:var(--mono);font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+h2.sec{font-family:var(--disp);font-size:clamp(1.5rem,3vw,2.1rem);font-weight:700;letter-spacing:-.02em;line-height:1.15;max-width:760px}
+.sec-sub{margin-top:14px;color:var(--muted);font-size:1rem;max-width:680px}
+.sec-sub b{color:var(--text)}
+section.doc{padding:56px 0;border-top:1px solid var(--border)}
+section.doc:first-of-type{border-top:none}
+
+.toc{margin:44px 0 24px;display:flex;flex-wrap:wrap;gap:10px}
+.toc a{font-family:var(--mono);font-size:.8rem;color:var(--muted);border:1px solid var(--border);border-radius:20px;padding:6px 14px}
+.toc a:hover{color:var(--text);border-color:var(--border2);text-decoration:none}
+
+pre.block{margin-top:22px;background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:22px 26px;font-family:var(--mono);font-size:.85rem;line-height:1.9;overflow-x:auto;color:var(--muted)}
+pre.block .c{color:var(--dim)}
+pre.block .g{color:var(--accent)}
+pre.block .k{color:#93c5fd}
+
+.tablewrap{overflow-x:auto;margin-top:22px;border:1px solid var(--border);border-radius:14px}
+table{width:100%;border-collapse:collapse;font-size:.9rem;background:var(--bg2)}
+th,td{padding:12px 18px;text-align:left;border-bottom:1px solid var(--border);vertical-align:top}
+tr:last-child td{border-bottom:none}
+th{color:var(--dim);font-weight:500;font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;background:var(--panel)}
+td{color:var(--muted)}
+td:first-child{font-family:var(--mono);font-size:.83rem;color:var(--text);white-space:nowrap}
+td .def{color:var(--accent);font-family:var(--mono);font-size:.78rem}
+td code{white-space:nowrap}
+
+.note{margin-top:22px;border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:12px;padding:18px 24px;font-size:.92rem;color:var(--muted);background:var(--bg2)}
+.note b{color:var(--text)}
+.note.warn{border-left-color:var(--contrast)}
+
+h3.sub{font-family:var(--disp);font-size:1.15rem;font-weight:700;margin-top:40px;letter-spacing:-.01em}
+p.body{margin-top:12px;color:var(--muted);font-size:.96rem;max-width:760px}
+p.body b{color:var(--text)}
+
+footer{border-top:1px solid var(--border);padding:44px 0;color:var(--dim);font-size:.86rem;margin-top:56px}
+footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}
+footer a{color:var(--muted)}
+
+@media (max-width:800px){
+  .wrap{padding:0 22px}
+  nav ul{display:none}
+}
+</style>
+</head>
+<body>
+
+<nav><div class="wrap">
+  <div class="logo"><a href="index.html" style="color:inherit;text-decoration:none">ctx-<em>optimize</em></a></div>
+  <ul>
+    <li><a href="#install">Install</a></li>
+    <li><a href="#cli">CLI</a></li>
+    <li><a href="#repo-config">Repo config</a></li>
+    <li><a href="#global-config">Global config</a></li>
+    <li><a href="#multi-module">Monorepos</a></li>
+    <li><a href="#remotes">Remotes</a></li>
+    <li><a href="https://github.com/muthuishere/ctx-optimize">GitHub</a></li>
+  </ul>
+</div></nav>
+
+<header class="hero"><div class="wrap">
+  <div class="kicker">reference</div>
+  <h1>Every command, every config key.<br><span class="ghost">One page, nothing hidden.</span></h1>
+  <p class="lede">ctx-optimize is configured in exactly three places: the <b>committed repo config</b> (<code>.ctxoptimize/config.json</code>), a <b>machine-global config</b> (<code>~/ctxoptimize/config.json</code>), and <b>one environment variable</b>. Everything else is a command.</p>
+  <div class="toc">
+    <a href="#install">Install</a>
+    <a href="#quickstart">Quickstart</a>
+    <a href="#cli">CLI reference</a>
+    <a href="#repo-config">Repo config</a>
+    <a href="#global-config">Global config</a>
+    <a href="#env">Environment</a>
+    <a href="#multi-module">Multi-module</a>
+    <a href="#remotes">Remotes &amp; sharing</a>
+    <a href="#adapters">Adapters</a>
+    <a href="#languages">Languages</a>
+    <a href="#store">Store layout</a>
+    <a href="#learning">Learning loop</a>
+    <a href="#contract">The contract</a>
+  </div>
+</div></header>
+
+<section class="doc" id="install"><div class="wrap">
+  <div class="sec-kicker">install</div>
+  <h2 class="sec">npm, Go, or a plain binary.</h2>
+  <pre class="block"><span class="c"># npm — thin launcher + prebuilt platform binary (no postinstall, no download step)</span>
+npm install -g @muthuishere/ctx-optimize
+
+<span class="c"># Go</span>
+go install github.com/muthuishere/ctx-optimize/cmd/ctx-optimize@latest
+
+<span class="c"># plain binaries (macOS / Linux / Windows) — GitHub Releases</span>
+<span class="c"># https://github.com/muthuishere/ctx-optimize/releases</span>
+
+<span class="c"># then give your agents the skill + prompt hook (Claude Code, Codex, Copilot, Devin)</span>
+ctx-optimize install --skills</pre>
+  <p class="body"><code>install</code> detects which agent CLIs are on the machine and reports per platform. Narrow with <code>--claude --codex --copilot --devin</code>, or with <code>--skills</code> / <code>--hooks</code> to install only one mechanism. Remove with <code>uninstall --skills</code>.</p>
+</div></section>
+
+<section class="doc" id="quickstart"><div class="wrap">
+  <div class="sec-kicker">quickstart</div>
+  <h2 class="sec">One repo, two commands. A monorepo, three.</h2>
+  <pre class="block"><span class="c"># single project</span>
+ctx-optimize init          <span class="c"># scaffolds .ctxoptimize/ (commit it) + writes the agent pointer block</span>
+ctx-optimize add .         <span class="c"># gathers code + docs + configs into ~/ctxoptimize/&lt;repo&gt;/</span>
+
+<span class="c"># monorepo</span>
+ctx-optimize scan                  <span class="c"># READ-ONLY: lists every project found + the exact config it would write</span>
+ctx-optimize init --scan --yes     <span class="c"># writes the FULL module list to config.json — yours to edit after</span>
+ctx-optimize add .                 <span class="c"># parallel fan-out: one store per module + a navigator</span>
+
+<span class="c"># then ask</span>
+ctx-optimize query "where is auth"
+ctx-optimize card HandleCheckout   <span class="c"># signature + doc + callers + callees, no file read</span>
+ctx-optimize affected PaymentService --depth 2</pre>
+</div></section>
+
+<section class="doc" id="cli"><div class="wrap">
+  <div class="sec-kicker">cli reference</div>
+  <h2 class="sec">The whole verb set.</h2>
+  <p class="sec-sub">Global flags on every command: <code>--path DIR</code> (which module/repo, default cwd) and <code>--store DIR</code> (store root, default <code>$CTX_OPTIMIZE_STORE</code> or <code>~/ctxoptimize</code>). Most read verbs take <code>--json</code>.</p>
+
+  <h3 class="sub">Build &amp; refresh</h3>
+  <div class="tablewrap"><table>
+    <tr><th>command</th><th>what it does</th></tr>
+    <tr><td>init</td><td>Scaffold <code>.ctxoptimize/</code> (config + adapters template), prepare the store, write the agent pointer block into the repo's instruction files (see <a href="#global-config">global config</a>). Re-running never clobbers your config or duplicates the block.</td></tr>
+    <tr><td>init --scan [--yes] [--depth N] [--modules "globs"]</td><td>Multi-module generator: scan, confirm, write the full found list into <code>modules[]</code>. Generated once — the list is yours to edit after.</td></tr>
+    <tr><td>scan [--depth N] [--json]</td><td>Read-only module discovery. Prints every project found and the exact config <code>init --scan</code> would write. Changes nothing.</td></tr>
+    <tr><td>add [&lt;path&gt;] [--force] [--jobs N]</td><td>Gather code + markdown + property/manifest files + every adapter. Incremental: re-add prunes stale nodes; a &gt;50% shrink is refused unless <code>--force</code> (a gutted gather is more likely a broken run than a huge refactor). At a multi-module root it fans out one worker per module and refreshes the navigator. Honors <code>.gitignore</code> via git itself.</td></tr>
+    <tr><td>add --json -|FILE</td><td>The universal door: upsert a validated batch of nodes+edges from any adapter/tool. Fail-closed — an invalid batch is rejected whole.</td></tr>
+    <tr><td>wiki</td><td>Regenerate the markdown wiki (every <code>add</code> already does).</td></tr>
+  </table></div>
+
+  <h3 class="sub">Ask</h3>
+  <div class="tablewrap"><table>
+    <tr><th>command</th><th>what it does</th></tr>
+    <tr><td>query|ask "terms" [--budget N] [--modules all|a,b] [--root]</td><td>Ranked, cited hits (id, kind, file:line, signature, neighbors). Scope follows cwd: in a module dir it answers from that module and escalates repo-wide on zero hits; at the root it federates across all modules. <code>--budget</code> caps output tokens (default 2000).</td></tr>
+    <tr><td>card "X"</td><td>Symbol card: signature, doc, location, callers, callees — cite without opening the file. Accepts id, exact label, or fuzzy name; strips invented qualifiers (<code>ns::Class::Method</code> → <code>Method</code>); a total miss suggests the nearest labels.</td></tr>
+    <tr><td>explain "X"</td><td>Plain-language node + neighborhood.</td></tr>
+    <tr><td>affected "X" [--depth N] [--relation R]</td><td>Reverse impact: what breaks if X changes.</td></tr>
+    <tr><td>path "A" "B"</td><td>Shortest path between two nodes.</td></tr>
+    <tr><td>hubs [--top N]</td><td>Most-connected nodes — where to start reading.</td></tr>
+    <tr><td>status</td><td>Store facts + freshness vs git HEAD + tokens-saved tally.</td></tr>
+    <tr><td>fresh</td><td>One-line verdict; exit 0 fresh / 1 stale / 2 unknown. The agent/hook gate before trusting an answer.</td></tr>
+    <tr><td>serve|dashboard [--port 4747]</td><td>Local read-only dashboard on 127.0.0.1. Zero external requests.</td></tr>
+  </table></div>
+
+  <h3 class="sub">Manage</h3>
+  <div class="tablewrap"><table>
+    <tr><th>command</th><th>what it does</th></tr>
+    <tr><td>config [&lt;key&gt; [&lt;value&gt;]]</td><td>Get/set machine-global settings — see <a href="#global-config">global config</a>.</td></tr>
+    <tr><td>remote init &lt;url&gt; [--local]</td><td>Write the remote to the repo config (committable). <code>--local</code> keeps it in this machine's store only.</td></tr>
+    <tr><td>remote push|pull</td><td>Incremental sync with the configured remote. No URL argument — the config file is the single source of truth. Scope follows cwd.</td></tr>
+    <tr><td>merge &lt;module&gt;... --into N</td><td>Combine module stores into one merged view. Always opt-in, never automatic.</td></tr>
+    <tr><td>export [--format json|dot|graphml|csv|obsidian|all] [--out F|DIR]</td><td>Dump the graph for other tools.</td></tr>
+    <tr><td>languages add|list|remove</td><td>Grammar packs — see <a href="#languages">languages</a>.</td></tr>
+    <tr><td>save-result / reflect</td><td>The learning loop — see <a href="#learning">below</a>.</td></tr>
+    <tr><td>install / uninstall --skills</td><td>Agent skill + prompt hooks per platform.</td></tr>
+  </table></div>
+</div></section>
+
+<section class="doc" id="repo-config"><div class="wrap">
+  <div class="sec-kicker">repo config · committed</div>
+  <h2 class="sec"><code>.ctxoptimize/config.json</code> — the only thing we put in your repo.</h2>
+  <p class="sec-sub">Scaffolded by <code>init</code>, owned by you, committed so the whole team's agents inherit it. Every field:</p>
+  <pre class="block">{
+  <span class="k">"name"</span>: "my-service",                <span class="c">// store key override (default: repo basename)</span>
+  <span class="k">"remote"</span>: {                           <span class="c">// or a plain string URL</span>
+    <span class="k">"type"</span>: "s3",
+    <span class="k">"url"</span>: "s3://team-bucket/ctx",
+    <span class="k">"credentials"</span>: {
+      <span class="k">"access_key_id"</span>: "${TEAM_KEY_ID}",       <span class="c">// ${VAR} resolves from env at sync time —</span>
+      <span class="k">"secret_access_key"</span>: "${TEAM_SECRET}",   <span class="c">// values are never written or printed</span>
+      <span class="k">"region"</span>: "auto",
+      <span class="k">"endpoint"</span>: "${R2_ENDPOINT}"
+    }
+  },
+  <span class="k">"adapters"</span>: [                         <span class="c">// optional explicit list; scripts dropped in</span>
+    {<span class="k">"name"</span>: "kafka", <span class="k">"run"</span>: "adapters/kafka.js"}   <span class="c">// adapters/ are auto-discovered anyway</span>
+  ],
+  <span class="k">"modules"</span>: [                          <span class="c">// PRESENT ⇒ this is a multi-module ROOT</span>
+    {<span class="k">"path"</span>: "services/api"},           <span class="c">// repo-relative; globs allowed: "libs/*"</span>
+    {<span class="k">"path"</span>: "services/worker", <span class="k">"name"</span>: "worker"}
+  ],
+  <span class="k">"scan"</span>: {                             <span class="c">// tunes scan / init --scan</span>
+    <span class="k">"depth"</span>: 5,                         <span class="c">// max depth below root (default 5)</span>
+    <span class="k">"markers"</span>: ["BUILD.bazel"],         <span class="c">// extra marker filenames</span>
+    <span class="k">"include"</span>: ["tools/gen"],           <span class="c">// globs force-added as modules</span>
+    <span class="k">"exclude"</span>: ["experiments/*"]        <span class="c">// globs pruned from the walk</span>
+  }
+}</pre>
+  <div class="tablewrap"><table>
+    <tr><th>field</th><th>meaning</th></tr>
+    <tr><td>name</td><td>Overrides the store folder under <code>~/ctxoptimize/</code>. Use when two repos share a basename or you want a custom key.</td></tr>
+    <tr><td>remote</td><td>Where <code>remote push/pull</code> syncs. A plain string (<code>"s3://…"</code>, <code>"file:///…"</code>) or the object form with credentials. <code>${VAR}</code> placeholders resolve from the environment at sync time; unset variables fail loudly and resolved values are never written anywhere.</td></tr>
+    <tr><td>adapters</td><td>Optional explicit adapter list. Any <code>.js</code>/<code>.mjs</code>/<code>.py</code>/<code>.sh</code> dropped into <code>.ctxoptimize/adapters/</code> is discovered automatically on <code>add</code> and must print one batch JSON to stdout. <code>init</code> seeds an inert <code>example.js.sample</code>.</td></tr>
+    <tr><td>modules</td><td>The generated, owned module list of a monorepo root. Written by <code>init --scan</code>, hand-editable, globs allowed. Present ⇒ <code>add</code> fans out and queries resolve scope against it.</td></tr>
+    <tr><td>module_of</td><td>(child configs only) Marks an opt-in config inside a module dir; the value is the root store key. Written automatically when you run <code>init</code> inside a declared module — never a shadow store.</td></tr>
+    <tr><td>scan</td><td>Generator tuning: <code>depth</code>, extra <code>markers</code>, <code>include</code>/<code>exclude</code> globs. Built-in markers: go.mod, go.work, package.json, pom.xml, build.gradle(.kts), settings.gradle(.kts), Cargo.toml, pyproject.toml, setup.py.</td></tr>
+  </table></div>
+  <div class="note"><b>Secrets rule.</b> Credentials live in the environment and are referenced by <b>name</b> (<code>${VAR}</code>). The binary resolves them only at the moment a sync call needs them; nothing resolved is ever stored, printed, or logged. Files whose names smell like secret stores (<code>secret</code>, <code>credential</code>, <code>password</code>, <code>.env*</code>) are refused by the extractors, and gathers honor your <code>.gitignore</code> via git's own semantics.</div>
+</div></section>
+
+<section class="doc" id="global-config"><div class="wrap">
+  <div class="sec-kicker">global config · per machine</div>
+  <h2 class="sec"><code>~/ctxoptimize/config.json</code> — your setup, not the repo's.</h2>
+  <p class="sec-sub">Managed by <code>ctx-optimize config</code>. Keys are flat artifact nouns; values name who gets the artifact. Never committed anywhere.</p>
+  <pre class="block">ctx-optimize config                          <span class="c"># list everything</span>
+ctx-optimize config instructions             <span class="c"># get one key</span>
+ctx-optimize config instructions CLAUDE      <span class="c"># set — scriptable (CI, npm setup step, dotfiles)</span></pre>
+  <div class="tablewrap"><table>
+    <tr><th>key</th><th>values</th><th>controls</th></tr>
+    <tr><td>instructions</td><td><code>CLAUDE</code> · <code>AGENTS</code> · <code>ALL</code> <span class="def">(default)</span> · <code>NONE</code></td><td>Which instruction files <code>init</code> writes the pointer block into: <code>CLAUDE.md</code>, <code>AGENTS.md</code>, both, or don't touch the repo at all. The block is marker-fenced — your surrounding content is never modified, and re-init never duplicates it.</td></tr>
+    <tr><td>skills</td><td><code>CLAUDE</code> · <code>AGENTS</code> · <code>ALL</code> <span class="def">(default)</span></td><td>Which skill directories <code>install --skills</code> writes: <code>~/.claude/skills</code> (Claude Code, Copilot), <code>~/.agents/skills</code> (the cross-CLI SKILL.md standard), or both.</td></tr>
+  </table></div>
+  <p class="body">Typos are refused with the valid options — a bad value never silently falls back to writing files. <code>BOTH</code> is accepted as an alias for <code>ALL</code>.</p>
+</div></section>
+
+<section class="doc" id="env"><div class="wrap">
+  <div class="sec-kicker">environment</div>
+  <h2 class="sec">One variable. That's the whole surface.</h2>
+  <div class="tablewrap"><table>
+    <tr><th>variable</th><th>meaning</th></tr>
+    <tr><td>CTX_OPTIMIZE_STORE</td><td>Store root override (default <code>~/ctxoptimize</code>). Also how tests stay hermetic.</td></tr>
+    <tr><td>${VAR} in remote credentials</td><td>Any variable your repo config references by name — resolved at sync time only, never persisted.</td></tr>
+  </table></div>
+</div></section>
+
+<section class="doc" id="multi-module"><div class="wrap">
+  <div class="sec-kicker">multi-module</div>
+  <h2 class="sec">One store per module, a navigator on top — never a giant merged graph.</h2>
+  <p class="sec-sub">Stores mirror your repo layout under <code>~/ctxoptimize/&lt;root&gt;/&lt;module-path&gt;/</code>. Nested modules (a Maven archetype inside a module) get their own store and are never double-extracted.</p>
+  <h3 class="sub">Scope follows where you ask</h3>
+  <div class="tablewrap"><table>
+    <tr><th>you ask from</th><th>what answers</th></tr>
+    <tr><td>a module directory</td><td>That module's store. Zero hits escalate repo-wide automatically — a miss is never a dead end.</td></tr>
+    <tr><td>the repo root</td><td>Federation across all module stores (<code>--modules a,b</code> narrows, <code>--root</code> forces the root residual only).</td></tr>
+    <tr><td>anywhere else inside the repo</td><td>The nearest config wins — resolution walks upward exactly like git finds <code>.git</code>.</td></tr>
+  </table></div>
+  <p class="body">The <b>navigator</b> (<code>navigator.md</code> + <code>modules.json</code> in the root store) is the map: every module, node/edge counts, top hubs, README summary, wiki links. It refreshes on every root <code>add</code>. Code that lives outside any declared module lands in the <b>root residual</b> graph, so nothing in the repo is invisible. Stores on disk that your config no longer declares are inert — federation is config-driven — and <code>add</code> tells you they're safe to delete. <code>merge</code> stays an explicit verb.</p>
+</div></section>
+
+<section class="doc" id="remotes"><div class="wrap">
+  <div class="sec-kicker">remotes &amp; sharing</div>
+  <h2 class="sec">Push the graph, not the gather time.</h2>
+  <pre class="block"><span class="c"># once, committed — the whole team inherits it</span>
+ctx-optimize remote init s3://team-bucket/ctx
+git add .ctxoptimize &amp;&amp; git commit -m "share the knowledge store"
+
+<span class="c"># teammate, fresh clone: no gather needed</span>
+ctx-optimize remote pull
+
+<span class="c"># after you gather new work</span>
+ctx-optimize add . &amp;&amp; ctx-optimize remote push</pre>
+  <p class="body">Two schemes: <b><code>s3://</code></b> (AWS, R2, MinIO — any S3-compatible endpoint; SigV4 in the stdlib, no SDK) and <b><code>file://</code></b> (shared drives). Sync is incremental by content hash and <b>scope-aware</b>: push from a monorepo root syncs the whole store tree, from a module dir only that module's prefix. Vocabulary: <b>sync</b> = keep the graph matching the code (<code>add .</code>, <code>fresh</code>); <b>share</b> = <code>remote push/pull</code>.</p>
+</div></section>
+
+<section class="doc" id="adapters"><div class="wrap">
+  <div class="sec-kicker">adapters</div>
+  <h2 class="sec">Anything becomes nodes: databases, topics, logs, documents.</h2>
+  <p class="sec-sub">The binary never grows drivers. An adapter is any script in <code>.ctxoptimize/adapters/</code> (<code>.js</code>/<code>.mjs</code> → node, <code>.py</code> → python3, <code>.sh</code> → sh) that prints one batch to stdout. It runs on every <code>add</code>; an invalid batch is rejected whole.</p>
+  <pre class="block">{
+  <span class="k">"producer"</span>: "kafka",
+  <span class="k">"nodes"</span>: [
+    {<span class="k">"id"</span>: "kafka://orders", <span class="k">"label"</span>: "orders", <span class="k">"kind"</span>: "topic",
+     <span class="k">"file_type"</span>: "messaging", <span class="k">"source"</span>: "kafka://orders", <span class="k">"location"</span>: "L1"}
+  ],
+  <span class="k">"edges"</span>: [
+    {<span class="k">"source"</span>: "kafka://orders", <span class="k">"target"</span>: "svc://billing",
+     <span class="k">"relation"</span>: "consumed_by", <span class="k">"confidence"</span>: "EXTRACTED"}
+  ]
+}</pre>
+  <p class="body">Replacement is <b>producer-scoped</b>: each adapter owns its slice of the graph; re-runs prune what it no longer emits, and other producers' nodes are untouched. <code>confidence</code> is honest provenance: <code>EXTRACTED</code> = parsed fact, <code>INFERRED</code> = name-matched. Cross-batch edges are the point — code ↔ docs ↔ schema link by node id. Read secrets from the environment inside your script; never hardcode values.</p>
+</div></section>
+
+<section class="doc" id="languages"><div class="wrap">
+  <div class="sec-kicker">languages</div>
+  <h2 class="sec">12 embedded, everything else is a drop-in pack.</h2>
+  <p class="body">Embedded (tree-sitter compiled to WASM, zero setup): <b>Go, Python, JavaScript, TypeScript/TSX, Java, C, C++, C#, Rust, Zig, SQL</b>. Any other language is a grammar pack — <code>&lt;name&gt;.wasm</code> + <code>&lt;name&gt;.json</code> mapping — in <code>~/ctxoptimize/grammars/</code> (machine) or <code>.ctxoptimize/grammars/</code> (repo, committable; kotlin/swift/dart ship in the repo's <code>grammars/</code>). Packs are discovered at add-time and override embedded grammars for their extensions; a malformed pack fails loudly.</p>
+  <pre class="block">ctx-optimize languages list            <span class="c"># embedded + installed packs + names addable by name</span>
+ctx-optimize languages add kotlin      <span class="c"># known name — builds the pack in pure Go (zig auto-fetched once, sha256-verified)</span>
+ctx-optimize languages add https://github.com/tree-sitter/tree-sitter-ruby
+ctx-optimize languages remove kotlin</pre>
+</div></section>
+
+<section class="doc" id="store"><div class="wrap">
+  <div class="sec-kicker">store layout</div>
+  <h2 class="sec">Plain files. Sorted output. Diffable forever.</h2>
+  <pre class="block">~/ctxoptimize/
+├── config.json                <span class="c"># machine-global settings (instructions, skills)</span>
+├── grammars/                  <span class="c"># machine-wide grammar packs</span>
+└── &lt;repo-name&gt;/               <span class="c"># one store per repo ("name" in repo config overrides)</span>
+    ├── graph/nodes.ndjson     <span class="c"># the graph — sorted, atomic-rename writes</span>
+    ├── graph/edges.ndjson
+    ├── manifest.json          <span class="c"># content hashes → incremental add</span>
+    ├── source.json            <span class="c"># git HEAD at gather time → the fresh gate</span>
+    ├── wiki/index.md          <span class="c"># deterministic wiki, regenerated on every add</span>
+    ├── reflections/LESSONS.md <span class="c"># the learning loop's output</span>
+    ├── navigator.md           <span class="c"># (multi-module roots) the module map</span>
+    ├── modules.json
+    └── services/api/          <span class="c"># (multi-module) one nested store per module, mirroring the repo</span></pre>
+</div></section>
+
+<section class="doc" id="learning"><div class="wrap">
+  <div class="sec-kicker">learning loop</div>
+  <h2 class="sec">The store remembers how its answers worked out.</h2>
+  <pre class="block"><span class="c"># after an answer proves useful (or doesn't) — the agent records it</span>
+ctx-optimize save-result --question "where is auth" --answer "internal/auth" \
+  --type query --nodes "auth.go::login" --outcome useful      <span class="c"># or dead_end | corrected</span>
+
+<span class="c"># at session start — aggregate with recency decay into reflections/LESSONS.md</span>
+ctx-optimize reflect</pre>
+  <p class="body">Deterministic, no model anywhere: the agent is the judge, the binary only tallies — preferred nodes (corroborated, recency-weighted), dead ends to avoid, verbatim corrections. <code>status</code> shows the running tokens-saved tally.</p>
+</div></section>
+
+<section class="doc" id="contract"><div class="wrap">
+  <div class="sec-kicker">the contract</div>
+  <h2 class="sec">What the binary will never do.</h2>
+  <p class="body">No LLM calls. No database drivers. No embeddings. No MCP server. No network — except the remote <b>you</b> configured. No telemetry. The host agent is the only intelligence; the binary is deterministic and its artifacts are plain, sorted, git-diffable files. Full reasoning: <a href="https://github.com/muthuishere/ctx-optimize/blob/main/docs/VISION.md">VISION.md</a> and the standing counter-weight <a href="https://github.com/muthuishere/ctx-optimize/blob/main/docs/CRITIQUE.md">CRITIQUE.md</a>.</p>
+</div></section>
+
+<footer><div class="wrap">
+  <div>ctx-<em style="color:var(--accent);font-style:normal">optimize</em> — gather once, refresh cheaply, answer from the store.</div>
+  <div><a href="index.html">Home</a> · <a href="https://github.com/muthuishere/ctx-optimize">GitHub</a> · <a href="https://www.npmjs.com/package/@muthuishere/ctx-optimize">npm</a> · Made by <a href="https://github.com/muthuishere">muthuishere</a></div>
+</div></footer>
+
+</body>
+</html>
