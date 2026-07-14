@@ -190,7 +190,7 @@ ctx-optimize affected PaymentService --depth 2</pre>
   <h3 class="sub">Manage</h3>
   <div class="tablewrap"><table>
     <tr><th>command</th><th>what it does</th></tr>
-    <tr><td>config [&lt;key&gt; [&lt;value&gt;]]</td><td>Get/set machine-global settings — see <a href="#global-config">global config</a>.</td></tr>
+    <tr><td>config [&lt;key&gt; [&lt;value&gt;]] [--project]</td><td>Get/set settings, git-style two levels: machine-global by default, <code>--project</code> writes the committable repo config. Project overrides global — see <a href="#global-config">settings</a>.</td></tr>
     <tr><td>remote init &lt;url&gt; [--local]</td><td>Write the remote to the repo config (committable). <code>--local</code> keeps it in this machine's store only.</td></tr>
     <tr><td>remote push|pull</td><td>Incremental sync with the configured remote. No URL argument — the config file is the single source of truth. Scope follows cwd.</td></tr>
     <tr><td>merge &lt;module&gt;... --into N</td><td>Combine module stores into one merged view. Always opt-in, never automatic.</td></tr>
@@ -239,21 +239,24 @@ ctx-optimize affected PaymentService --depth 2</pre>
     <tr><td>modules</td><td>The generated, owned module list of a monorepo root. Written by <code>init --scan</code>, hand-editable, globs allowed. Present ⇒ <code>add</code> fans out and queries resolve scope against it.</td></tr>
     <tr><td>module_of</td><td>(child configs only) Marks an opt-in config inside a module dir; the value is the root store key. Written automatically when you run <code>init</code> inside a declared module — never a shadow store.</td></tr>
     <tr><td>scan</td><td>Generator tuning: <code>depth</code>, extra <code>markers</code>, <code>include</code>/<code>exclude</code> globs. Built-in markers: go.mod, go.work, package.json, pom.xml, build.gradle(.kts), settings.gradle(.kts), Cargo.toml, pyproject.toml, setup.py.</td></tr>
+    <tr><td>instructions · skills · hooks</td><td>Per-project overrides of the <a href="#global-config">machine-global settings</a> — set with <code>config &lt;key&gt; &lt;value&gt; --project</code>, committed so the whole team inherits them. Empty = inherit global.</td></tr>
   </table></div>
   <div class="note"><b>Secrets rule.</b> Credentials live in the environment and are referenced by <b>name</b> (<code>${VAR}</code>). The binary resolves them only at the moment a sync call needs them; nothing resolved is ever stored, printed, or logged. Files whose names smell like secret stores (<code>secret</code>, <code>credential</code>, <code>password</code>, <code>.env*</code>) are refused by the extractors, and gathers honor your <code>.gitignore</code> via git's own semantics.</div>
 </div></section>
 
 <section class="doc" id="global-config"><div class="wrap">
-  <div class="sec-kicker">global config · per machine</div>
-  <h2 class="sec"><code>~/ctxoptimize/config.json</code> — your setup, not the repo's.</h2>
-  <p class="sec-sub">Managed by <code>ctx-optimize config</code>. Keys are flat artifact nouns; values name who gets the artifact. Never committed anywhere.</p>
-  <pre class="block">ctx-optimize config                          <span class="c"># list everything</span>
-ctx-optimize config instructions             <span class="c"># get one key</span>
-ctx-optimize config instructions CLAUDE      <span class="c"># set — scriptable (CI, npm setup step, dotfiles)</span></pre>
+  <div class="sec-kicker">settings · global + per project</div>
+  <h2 class="sec">Two levels, git-style: machine-global, and <code>--project</code> overrides it.</h2>
+  <p class="sec-sub">Managed by <code>ctx-optimize config</code>. Global lives in <code>~/ctxoptimize/config.json</code> (never committed); <code>--project</code> writes the same keys into the repo's <code>.ctxoptimize/config.json</code> (committable — a team pins a repo's behavior). <b>Project beats global.</b> Keys are flat artifact nouns; values name who gets the artifact.</p>
+  <pre class="block">ctx-optimize config                              <span class="c"># list effective values + which level set them</span>
+ctx-optimize config instructions                 <span class="c"># get one key (effective)</span>
+ctx-optimize config instructions CLAUDE          <span class="c"># set globally — scriptable (CI, npm setup, dotfiles)</span>
+ctx-optimize config instructions AGENTS --project <span class="c"># pin for THIS repo — commit .ctxoptimize/</span></pre>
   <div class="tablewrap"><table>
     <tr><th>key</th><th>values</th><th>controls</th></tr>
     <tr><td>instructions</td><td><code>CLAUDE</code> · <code>AGENTS</code> · <code>ALL</code> <span class="def">(default)</span> · <code>NONE</code></td><td>Which instruction files <code>init</code> writes the pointer block into: <code>CLAUDE.md</code>, <code>AGENTS.md</code>, both, or don't touch the repo at all. The block is marker-fenced — your surrounding content is never modified, and re-init never duplicates it.</td></tr>
     <tr><td>skills</td><td><code>CLAUDE</code> · <code>AGENTS</code> · <code>ALL</code> <span class="def">(default)</span></td><td>Which skill directories <code>install --skills</code> writes: <code>~/.claude/skills</code> (Claude Code, Copilot), <code>~/.agents/skills</code> (the cross-CLI SKILL.md standard), or both.</td></tr>
+    <tr><td>hooks</td><td><code>CLAUDE</code> · <code>AGENTS</code> · <code>ALL</code> <span class="def">(default)</span> · <code>NONE</code></td><td>Which platforms' prompt-hook files <code>install</code> writes: the Claude hook (<code>~/.claude/settings.json</code>), the AGENTS-family hooks (codex <code>~/.codex/hooks.json</code>, copilot), both, or none. <b>Devin never needs a hook file</b> — it reads the Claude hook <i>and</i> AGENTS.md natively, and the install report says which lane covers it.</td></tr>
   </table></div>
   <p class="body">Typos are refused with the valid options — a bad value never silently falls back to writing files. <code>BOTH</code> is accepted as an alias for <code>ALL</code>.</p>
 </div></section>
