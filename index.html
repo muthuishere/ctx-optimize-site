@@ -244,7 +244,11 @@ ctx-optimize install --skills               <span class="c"># teach your coding 
   <p class="sec-sub" style="margin-top:16px">Monorepo? One more command finds every project first:</p>
   <pre class="reveal" style="margin-top:12px"><span class="g">ctx-optimize scan</span>                           <span class="c"># lists every project it found (read-only)</span>
 ctx-optimize init --scan --yes && add .      <span class="c"># one store per module + a navigator</span></pre>
-  <p class="sec-sub" style="margin-top:18px">v0.3 · macOS / Linux / Windows · works with Claude Code, Codex, Copilot &amp; Devin · now with framework <a href="docs.html#v03">routes, build-tool dependencies, k8s topology, subsystems &amp; a first-class dashboard</a> · <a href="https://github.com/muthuishere/ctx-optimize">source on GitHub</a>.</p>
+  <p class="sec-sub" style="margin-top:16px">Source and tests in <b>separate folders</b> (the .NET / Gradle case)? Declare one module across both — they share a graph, and test→source calls resolve across the split:</p>
+  <pre class="reveal" style="margin-top:12px"><span class="c"># .ctxoptimize/config.json</span>
+"modules": [{ <span class="g">"name"</span>: "Billing", <span class="g">"paths"</span>: [<span class="g">"src/Billing"</span>, <span class="g">"tests/Billing.Tests"</span>] }]</pre>
+  <p class="sec-sub" style="margin-top:16px">A teammate cloning your repo runs <b>one</b> command — <code>init</code> reads the committed remote and fetches your prebuilt graph instead of rebuilding.</p>
+  <p class="sec-sub" style="margin-top:18px">v0.3.5 · macOS / Linux / Windows · works with Claude Code, Codex, Copilot &amp; Devin · framework <a href="docs.html#v03">routes, build-tool dependencies, k8s topology, subsystems, multi-path modules &amp; a first-class dashboard</a> · <a href="https://github.com/muthuishere/ctx-optimize">source on GitHub</a>.</p>
 </div></section>
 
 <section class="herodemo" id="agent" style="padding:70px 0"><div class="wrap">

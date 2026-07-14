@@ -141,6 +141,8 @@ footer a{color:var(--muted)}
     <tr><td>Freshness / staleness gate</td><td class="win">git-HEAD gate</td><td class="win">auto-sync</td><td>sync</td><td class="lose">static dump</td><td>re-index</td><td class="win">live</td></tr>
     <tr><td>Routes / deps / k8s as graph</td><td class="win">yes (v0.3)</td><td class="win">routes+bridges</td><td class="mid">partial</td><td class="lose">no</td><td>no</td><td class="lose">no</td></tr>
     <tr><td>Extensible without forking</td><td class="win">packs (4 axes)</td><td class="mid">config</td><td class="mid">config</td><td>plugins</td><td>no</td><td class="lose">no</td></tr>
+    <tr><td>Module = scattered folders (src/ + tests/)</td><td class="win">yes (v0.3.5)</td><td class="mid">one graph</td><td class="mid">one graph</td><td class="mid">one graph</td><td>—</td><td>—</td></tr>
+    <tr><td>Team clone → prebuilt graph in one step</td><td class="win">init auto-pulls</td><td class="lose">rebuild</td><td class="lose">rebuild</td><td class="lose">rebuild</td><td class="lose">re-index</td><td class="lose">re-warm</td></tr>
     <tr><td>License</td><td class="win">MIT</td><td class="win">MIT</td><td class="lose">noncommercial</td><td>open</td><td>open-core</td><td class="win">MIT</td></tr>
   </table></div>
   <p class="body"><span class="win">green</span> = a genuine strength, <span class="mid">amber</span> = partial / caveated, <span class="lose">red</span> = a real weakness. Notice ours has red in it. The most important red is <b>MCP</b> — see "our bet."</p>

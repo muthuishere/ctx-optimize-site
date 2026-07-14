@@ -165,6 +165,9 @@ ctx-optimize affected PaymentService --depth 2</pre>
   <h2 class="sec">Routes, dependencies, subsystems, co-change — and a real dashboard.</h2>
   <p class="sec-sub">Every one of these is deterministic pure-Go extraction over the ASTs and git history we already hold — no model, no network, same contract.</p>
 
+  <h3 class="sub">v0.3.5 — scattered modules, one-step clones, a viewer that never white-screens</h3>
+  <p class="body"><b>Multi-path modules.</b> A module can be a <em>set</em> of folders, not one subtree: <code>{"name": "Billing", "paths": ["src/Billing", "tests/Billing.Tests"]}</code>. The .NET / Gradle case — source in <code>src/</code>, tests in <code>tests/</code> — gathers into <b>one</b> store and extracts in a single pass, so test→source calls resolve <em>across</em> the split instead of breaking at a folder boundary. <b>One-step clones.</b> <code>init</code> now reads the committed remote: on a fresh clone it <b>fetches the prebuilt graph itself</b> rather than rebuilding from source (<code>--force</code> to re-index), and the agent-instruction block it writes is gated — if the binary isn't installed, agents ignore it and read code normally. <b>A crash-proof viewer.</b> One malformed graph node used to blank the whole dashboard; now a bad node is sanitized or dropped alone and every healthy node still renders, behind an error boundary — covered by unit tests.</p>
+
   <h3 class="sub">Framework routes — the edge grep can't produce</h3>
   <p class="body">Routing declarations become <code>route</code> nodes linked by <code>handles</code> edges to their handlers, so <code>affected &lt;handler&gt;</code> surfaces the URL that binds it and <code>query "GET /users"</code> finds the endpoint. Core recognizers: <b>FastAPI, Flask, Express, NestJS, Angular, React Router, Vue Router</b> (from source) and <b>OpenAPI, Drupal <code>*.routing.yml</code>, Kubernetes Ingress</b> (from YAML). Edges are <code>INFERRED</code> with a <code>synthesized_by</code> channel tag — honest provenance. Anything call-shaped that isn't core is a <b>route pack</b> (see below).</p>
 
@@ -256,8 +259,9 @@ ctx-optimize manifests list</pre>
     {<span class="k">"name"</span>: "kafka", <span class="k">"run"</span>: "adapters/kafka.js"}   <span class="c">// adapters/ are auto-discovered anyway</span>
   ],
   <span class="k">"modules"</span>: [                          <span class="c">// PRESENT ⇒ this is a multi-module ROOT</span>
-    {<span class="k">"path"</span>: "services/api"},           <span class="c">// repo-relative; globs allowed: "libs/*"</span>
-    {<span class="k">"path"</span>: "services/worker", <span class="k">"name"</span>: "worker"}
+    {<span class="k">"path"</span>: "services/api"},           <span class="c">// single-path: one dir, mirrored store</span>
+    {<span class="k">"path"</span>: "services/worker", <span class="k">"name"</span>: "worker"},
+    {<span class="k">"name"</span>: "Billing", <span class="k">"paths"</span>: ["src/Billing", "tests/Billing.Tests"]}  <span class="c">// multi-path: scattered folders → ONE store</span>
   ],
   <span class="k">"scan"</span>: {                             <span class="c">// tunes scan / init --scan</span>
     <span class="k">"depth"</span>: 5,                         <span class="c">// max depth below root (default 5)</span>
@@ -271,7 +275,7 @@ ctx-optimize manifests list</pre>
     <tr><td>name</td><td>Overrides the store folder under <code>~/ctxoptimize/</code>. Use when two repos share a basename or you want a custom key.</td></tr>
     <tr><td>remote</td><td>Where <code>remote push/pull</code> syncs. A plain string (<code>"s3://…"</code>, <code>"file:///…"</code>) or the object form with credentials. <code>${VAR}</code> placeholders resolve from the environment at sync time; unset variables fail loudly and resolved values are never written anywhere.</td></tr>
     <tr><td>adapters</td><td>Optional explicit adapter list. Any <code>.js</code>/<code>.mjs</code>/<code>.py</code>/<code>.sh</code> dropped into <code>.ctxoptimize/adapters/</code> is discovered automatically on <code>add</code> and must print one batch JSON to stdout. <code>init</code> seeds an inert <code>example.js.sample</code>.</td></tr>
-    <tr><td>modules</td><td>The generated, owned module list of a monorepo root. Written by <code>init --scan</code>, hand-editable, globs allowed. Present ⇒ <code>add</code> fans out and queries resolve scope against it.</td></tr>
+    <tr><td>modules</td><td>The generated, owned module list of a monorepo root. Written by <code>init --scan</code>, hand-editable, globs allowed. Present ⇒ <code>add</code> fans out and queries resolve scope against it. Two shapes: <code>{"path": "…"}</code> for a single directory, or <b><code>{"name": "X", "paths": ["…", "…"]}</code></b> to gather several <b>scattered</b> folders into ONE store — the .NET / Gradle case where a module's source and tests live in separate top-level dirs (<code>src/Billing</code> + <code>tests/Billing.Tests</code>). Multi-path modules extract in a single pass, so test→source calls resolve <em>across</em> the folder split.</td></tr>
     <tr><td>module_of</td><td>(child configs only) Marks an opt-in config inside a module dir; the value is the root store key. Written automatically when you run <code>init</code> inside a declared module — never a shadow store.</td></tr>
     <tr><td>scan</td><td>Generator tuning: <code>depth</code>, extra <code>markers</code>, <code>include</code>/<code>exclude</code> globs. Built-in markers: go.mod, go.work, package.json, pom.xml, build.gradle(.kts), settings.gradle(.kts), Cargo.toml, pyproject.toml, setup.py.</td></tr>
     <tr><td>instructions · skills · hooks</td><td>Per-project overrides of the <a href="#global-config">machine-global settings</a> — set with <code>config &lt;key&gt; &lt;value&gt; --project</code>, committed so the whole team inherits them. Empty = inherit global.</td></tr>
@@ -309,7 +313,7 @@ ctx-optimize config instructions AGENTS --project <span class="c"># pin for THIS
 <section class="doc" id="multi-module"><div class="wrap">
   <div class="sec-kicker">multi-module</div>
   <h2 class="sec">One store per module, a navigator on top — never a giant merged graph.</h2>
-  <p class="sec-sub">Stores mirror your repo layout under <code>~/ctxoptimize/&lt;root&gt;/&lt;module-path&gt;/</code>. Nested modules (a Maven archetype inside a module) get their own store and are never double-extracted.</p>
+  <p class="sec-sub">Stores mirror your repo layout under <code>~/ctxoptimize/&lt;root&gt;/&lt;module-path&gt;/</code>. Nested modules (a Maven archetype inside a module) get their own store and are never double-extracted. A module can also be a <b>set of scattered folders</b> — <code>{"name": "Billing", "paths": ["src/Billing", "tests/Billing.Tests"]}</code> — gathered into one name-keyed store so source and tests that live in separate top-level dirs (the .NET / Gradle convention) share a graph and resolve calls across the split.</p>
   <h3 class="sub">Scope follows where you ask</h3>
   <div class="tablewrap"><table>
     <tr><th>you ask from</th><th>what answers</th></tr>
@@ -327,8 +331,9 @@ ctx-optimize config instructions AGENTS --project <span class="c"># pin for THIS
 ctx-optimize remote init s3://team-bucket/ctx
 git add .ctxoptimize &amp;&amp; git commit -m "share the knowledge store"
 
-<span class="c"># teammate, fresh clone: no gather needed</span>
-ctx-optimize remote pull
+<span class="c"># teammate, fresh clone: `init` sees the committed remote and</span>
+<span class="c"># FETCHES the prebuilt graph itself — no rebuild from source</span>
+ctx-optimize init            <span class="c"># auto-pulls; or `remote pull` directly</span>
 
 <span class="c"># after you gather new work</span>
 ctx-optimize add . &amp;&amp; ctx-optimize remote push</pre>
