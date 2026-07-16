@@ -141,7 +141,7 @@ footer a{color:var(--muted)}
     <tr><td>Routes / deps / k8s as graph</td><td class="win">yes (v0.3)</td><td class="win">routes+bridges</td><td class="mid">partial</td><td class="lose">no</td><td>no</td><td class="lose">no</td></tr>
     <tr><td>Extensible without forking</td><td class="win">packs (4 axes)</td><td class="mid">config</td><td class="mid">config</td><td>plugins</td><td>no</td><td class="lose">no</td></tr>
     <tr><td>Module = scattered folders (src/ + tests/)</td><td class="win">yes (v0.3.5)</td><td class="mid">one graph</td><td class="mid">one graph</td><td class="mid">one graph</td><td>—</td><td>—</td></tr>
-    <tr><td>Team clone → prebuilt graph in one step</td><td class="win">init auto-pulls</td><td class="lose">rebuild</td><td class="lose">rebuild</td><td class="lose">rebuild</td><td class="lose">re-index</td><td class="lose">re-warm</td></tr>
+    <tr><td>Team clone → prebuilt graph in one step</td><td class="win">one verb: <code>up</code></td><td class="lose">rebuild</td><td class="lose">rebuild</td><td class="lose">rebuild</td><td class="lose">re-index</td><td class="lose">re-warm</td></tr>
     <tr><td>License</td><td class="win">MIT</td><td class="win">MIT</td><td class="lose">noncommercial</td><td>open</td><td>open-core</td><td class="win">MIT</td></tr>
   </table></div>
   <p class="body"><span class="win">green</span> = a genuine strength, <span class="mid">amber</span> = partial / caveated, <span class="lose">red</span> = a real weakness. Notice ours has red in it. The most important red is <b>MCP</b> — see "our bet."</p>
@@ -216,7 +216,7 @@ footer a{color:var(--muted)}
 <section class="doc" id="bet"><div class="wrap">
   <div class="sec-kicker">our bet — and our one honest gap</div>
   <h2 class="sec">A single deterministic binary you extend, not a service you run.</h2>
-  <p class="body">Strip away the scoreboard and the difference is philosophical. Everyone else is a <b>store format + a server</b> (SQLite, LadybugDB, Neo4j) or a <b>live service</b> (LSP). We're a <b>single static Go binary</b> — no database process, no embeddings, no model, no network except a remote you configure — whose artifacts are plain, sorted, git-diffable files. What that buys:</p>
+  <p class="body">Strip away the scoreboard and the difference is philosophical. Everyone else is a <b>store format + a server</b> (SQLite, LadybugDB, Neo4j) or a <b>live service</b> (LSP). We're a <b>single static Go binary</b> — no database process, no embeddings, no model, no network except what you invoke yourself (a self-update, a one-time toolchain fetch, your own remote scripts) — whose artifacts are plain, sorted, git-diffable files. What that buys:</p>
   <ul class="clean">
     <li class="up"><span class="m">+</span><span><b>Truly zero setup.</b> <code>npm i -g</code> or one binary, works offline, nothing to stand up — not even a local DB daemon.</span></li>
     <li class="up"><span class="m">+</span><span><b>Extend without forking.</b> Routes, manifests, languages, and any data source are drop-in packs/adapters — commit the file, the whole team's agents inherit it. No other tool here lets you add a framework recognizer as a committed JSON file.</span></li>

@@ -107,6 +107,7 @@ footer a{color:var(--muted)}
   <div class="toc">
     <a href="#install">Install</a>
     <a href="#quickstart">Quickstart</a>
+    <a href="#v04">New in v0.4</a>
     <a href="#v03">New in v0.3</a>
     <a href="#cli">CLI reference</a>
     <a href="#repo-config">Repo config</a>
@@ -135,26 +136,60 @@ go install github.com/muthuishere/ctx-optimize/cmd/ctx-optimize@latest
 <span class="c"># https://github.com/muthuishere/ctx-optimize/releases</span>
 
 <span class="c"># then give your agents the skill + prompt hook (Claude Code, Codex, Copilot, Devin)</span>
-ctx-optimize install --skills</pre>
-  <p class="body"><code>install</code> detects which agent CLIs are on the machine and reports per platform. Narrow with <code>--claude --codex --copilot --devin</code>, or with <code>--skills</code> / <code>--hooks</code> to install only one mechanism. Remove with <code>uninstall --skills</code>.</p>
+ctx-optimize install --skills
+
+<span class="c"># later — one command updates the binary AND every installed surface</span>
+ctx-optimize update            <span class="c"># npm installs update via npm; standalone binaries from</span>
+                               <span class="c"># GitHub Releases, sha256-verified against checksums.txt,</span>
+                               <span class="c"># swapped atomically — then skills + hooks refresh</span>
+ctx-optimize update --check    <span class="c"># report only, touch nothing</span></pre>
+  <p class="body"><code>install</code> detects which agent CLIs are on the machine and reports per platform. Narrow with <code>--claude --codex --copilot --devin</code>, or with <code>--skills</code> / <code>--hooks</code> to install only one mechanism. Remove everything with plain <code>uninstall</code> — no flags needed; stores and committed repo pointers stay. <code>update</code>'s network call happens only when <b>you</b> run it — the binary never checks for updates in the background.</p>
 </div></section>
 
 <section class="doc" id="quickstart"><div class="wrap">
   <div class="sec-kicker">quickstart</div>
-  <h2 class="sec">One repo, two commands. A monorepo, three.</h2>
-  <pre class="block"><span class="c"># single project</span>
-ctx-optimize init          <span class="c"># scaffolds .ctxoptimize/ (commit it) + writes the agent pointer block</span>
-ctx-optimize add .         <span class="c"># gathers code + docs + configs into ~/ctxoptimize/&lt;repo&gt;/</span>
+  <h2 class="sec">One verb. Bare repo, monorepo, fresh clone, CI — <code>up</code> decides.</h2>
+  <pre class="block"><span class="c"># the whole getting-started story — run it whenever, it's idempotent</span>
+ctx-optimize up            <span class="c"># no config → bootstraps it (monorepos via scan; curate</span>
+                           <span class="c">#   .ctxoptimize/config.json after) and gathers</span>
+                           <span class="c"># config declares a remote.pull + no local store → pulls the</span>
+                           <span class="c">#   team's prebuilt graph (falls back to gathering, loudly)</span>
+                           <span class="c"># no remote → gathers · stale vs git HEAD → fast re-gather</span>
+                           <span class="c"># fresh → no-op</span>
 
-<span class="c"># monorepo</span>
-ctx-optimize scan                  <span class="c"># READ-ONLY: lists every project found + the exact config it would write</span>
+<span class="c"># author-side, when you want control instead of up's defaults</span>
+ctx-optimize init          <span class="c"># scaffolds .ctxoptimize/ (commit it): config, adapter + transport</span>
+                           <span class="c">#   samples, remote.example.md, agent pointer block</span>
+ctx-optimize scan                  <span class="c"># monorepo, READ-ONLY: lists every project + the config it would write</span>
 ctx-optimize init --scan --yes     <span class="c"># writes the FULL module list to config.json — yours to edit after</span>
-ctx-optimize add .                 <span class="c"># parallel fan-out: one store per module + a navigator</span>
+ctx-optimize add .                 <span class="c"># gather explicitly (parallel fan-out per module + a navigator)</span>
 
 <span class="c"># then ask</span>
 ctx-optimize query "where is auth"
 ctx-optimize card HandleCheckout   <span class="c"># signature + doc + callers + callees, no file read</span>
+ctx-optimize change-plan PaymentService   <span class="c"># about to EDIT: callers + blast radius + which tests to run, one call</span>
 ctx-optimize affected PaymentService --depth 2</pre>
+</div></section>
+
+<section class="doc" id="v04"><div class="wrap">
+  <div class="sec-kicker">new in v0.4 · breaking</div>
+  <h2 class="sec">The remote is your script. Onboarding is one verb.</h2>
+  <p class="sec-sub">Same contract as ever — deterministic binary, no LLM, no DB — and the network surface is now spelled exactly: <b>only when you ask</b> (<code>update</code>, <code>grammar build</code>'s one-time zig fetch, and whatever your own remote scripts do).</p>
+
+  <h3 class="sub">Scripted remotes — the binary ships no transport (breaking)</h3>
+  <p class="body"><code>remote push</code> / <code>remote pull</code> now run the commands <b>you</b> declare in the committed <code>.ctxoptimize/config.json</code> — any shell line (js, py, sh, inline). The built-in <code>file://</code> + <code>s3://</code> transports and <code>remote init</code> are <b>gone</b>; a legacy URL-shaped config still loads but is inert, and <code>push</code>/<code>pull</code> print the migration pointer. Your command receives the store context in env — <code>CTX_STORE_DIR</code>, <code>CTX_STORE_KEY</code>, <code>CTX_SCOPE_PREFIX</code>, <code>CTX_DIRECTION</code> — and a non-zero exit fails the verb. <code>init</code> scaffolds a complete zero-dependency <b>git lane</b> as inert samples (<code>push.js.sample</code> / <code>pull.js.sample</code>) plus <code>remote.example.md</code> with git / s3 / custom recipes. Details in <a href="#remotes">Remotes &amp; sharing</a>.</p>
+
+  <h3 class="sub"><code>up</code> — the one onboarding verb, bare repo included</h3>
+  <p class="body">Bare repo, fresh clone, teammate machine, CI: <code>ctx-optimize up</code> makes the store exist and be current, whatever it takes. No config at all → bootstraps it (monorepos via scan; curate <code>.ctxoptimize/config.json</code> after) and gathers; empty store + declared <code>remote.pull</code> → run it (a failed pull falls back to a local gather, loudly); no remote → gather; stale vs git HEAD → fast re-gather (adapter scripts skipped); fresh → no-op. Idempotent — run it whenever. <code>init</code> stays the author-control door (review module lists, pick pointer targets, transport samples); on a pull-declaring clone it just redirects to <code>up</code>. CI gate: <code>ctx-optimize up &amp;&amp; ctx-optimize fresh</code>.</p>
+
+  <h3 class="sub">Fast lane / slow lane — <code>sync</code> and <code>adapters run</code></h3>
+  <p class="body">Adapter scripts can be arbitrarily slow (DB dumps, doc converters), so they get their own lanes. <code>sync</code> re-gathers the repo you're in — code, docs, manifests, git — and <b>skips</b> adapters (safe: replacement is producer-scoped, adapter nodes stay put). <code>adapters list</code> shows them; <code>adapters run [name]</code> re-runs all or one on demand when the external system changed. <code>add --no-adapters</code> is the fast lane spelled long.</p>
+
+  <h3 class="sub"><code>update</code> — the whole tool, one command</h3>
+  <p class="body">Updates the binary (npm installs via npm; standalone binaries from GitHub Releases, sha256-verified against the release's <code>checksums.txt</code>, swapped atomically — dev builds left alone) and then refreshes skills, hooks and the global rule from the binary that is now current. <code>update --check</code> reports without touching anything. User-invoked network only — never a background check.</p>
+
+  <h3 class="sub"><code>change-plan</code> — the composed "I'm about to change X" answer</h3>
+  <p class="body">One bounded call returns the signature, callers, blast radius, <b>which tests to run</b> (affected filtered to test declarations), historical co-changes, and a confidence footer separating extracted from inferred evidence. Measured on this repo: <b>229 tokens in 1 call vs 2,270 across the query+card+affected chain it replaces — ~90% fewer answer tokens</b>. Alias: <code>plan</code>.</p>
 </div></section>
 
 <section class="doc" id="v03"><div class="wrap">
@@ -163,7 +198,7 @@ ctx-optimize affected PaymentService --depth 2</pre>
   <p class="sec-sub">Every one of these is deterministic pure-Go extraction over the ASTs and git history we already hold — no model, no network, same contract.</p>
 
   <h3 class="sub">v0.3.5 — scattered modules, one-step clones, a viewer that never white-screens</h3>
-  <p class="body"><b>Multi-path modules.</b> A module can be a <em>set</em> of folders, not one subtree: <code>{"name": "Billing", "paths": ["src/Billing", "tests/Billing.Tests"]}</code>. The .NET / Gradle case — source in <code>src/</code>, tests in <code>tests/</code> — gathers into <b>one</b> store and extracts in a single pass, so test→source calls resolve <em>across</em> the split instead of breaking at a folder boundary. <b>One-step clones.</b> <code>init</code> now reads the committed remote: on a fresh clone it <b>fetches the prebuilt graph itself</b> rather than rebuilding from source (<code>--force</code> to re-index), and the agent-instruction block it writes is gated — if the binary isn't installed, agents ignore it and read code normally. <b>A crash-proof viewer.</b> One malformed graph node used to blank the whole dashboard; now a bad node is sanitized or dropped alone and every healthy node still renders, behind an error boundary — covered by unit tests.</p>
+  <p class="body"><b>Multi-path modules.</b> A module can be a <em>set</em> of folders, not one subtree: <code>{"name": "Billing", "paths": ["src/Billing", "tests/Billing.Tests"]}</code>. The .NET / Gradle case — source in <code>src/</code>, tests in <code>tests/</code> — gathers into <b>one</b> store and extracts in a single pass, so test→source calls resolve <em>across</em> the split instead of breaking at a folder boundary. <b>One-step clones.</b> A fresh clone fetches the team's prebuilt graph instead of rebuilding from source — since v0.4 the verb for this is <code>ctx-optimize up</code> (<code>init</code> on a pull-declaring clone just redirects to it). The agent-instruction block <code>init</code> writes is gated — if the binary isn't installed, agents ignore it and read code normally. <b>A crash-proof viewer.</b> One malformed graph node used to blank the whole dashboard; now a bad node is sanitized or dropped alone and every healthy node still renders, behind an error boundary — covered by unit tests.</p>
 
   <h3 class="sub">Framework routes — the edge grep can't produce</h3>
   <p class="body">Routing declarations become <code>route</code> nodes linked by <code>handles</code> edges to their handlers, so <code>affected &lt;handler&gt;</code> surfaces the URL that binds it and <code>query "GET /users"</code> finds the endpoint. Core recognizers: <b>FastAPI, Flask, Express, NestJS, Angular, React Router, Vue Router</b> (from source) and <b>OpenAPI, Drupal <code>*.routing.yml</code>, Kubernetes Ingress</b> (from YAML). Edges are <code>INFERRED</code> with a <code>synthesized_by</code> channel tag — honest provenance. Anything call-shaped that isn't core is a <b>route pack</b> (see below).</p>
@@ -200,11 +235,14 @@ ctx-optimize manifests list</pre>
   <h3 class="sub">Build &amp; refresh</h3>
   <div class="tablewrap"><table>
     <tr><th>command</th><th>what it does</th></tr>
-    <tr><td>init</td><td>Scaffold <code>.ctxoptimize/</code> (config + adapters template), prepare the store, write the agent pointer block into the repo's instruction files (see <a href="#global-config">global config</a>). Re-running never clobbers your config or duplicates the block.</td></tr>
+    <tr><td>init</td><td>The author-control door: scaffold <code>.ctxoptimize/</code> (config, adapter template, transport samples <code>push.js.sample</code>/<code>pull.js.sample</code>, <code>remote.example.md</code>), prepare the store, write the agent pointer block into the repo's instruction files (see <a href="#global-config">global config</a>). Re-running never clobbers your config or duplicates the block; on a pull-declaring clone it redirects to <code>up</code>. Don't need control? <code>up</code> bootstraps for you.</td></tr>
     <tr><td>init --scan [--yes] [--depth N] [--modules "globs"]</td><td>Multi-module generator: scan, confirm, write the full found list into <code>modules[]</code>. Generated once — the list is yours to edit after.</td></tr>
     <tr><td>scan [--depth N] [--json]</td><td>Read-only module discovery. Prints every project found and the exact config <code>init --scan</code> would write. Changes nothing.</td></tr>
-    <tr><td>add [&lt;path&gt;] [--force] [--jobs N]</td><td>Gather code + markdown + property/manifest files + every adapter. Incremental: re-add prunes stale nodes; a &gt;50% shrink is refused unless <code>--force</code> (a gutted gather is more likely a broken run than a huge refactor). At a multi-module root it fans out one worker per module and refreshes the navigator. Honors <code>.gitignore</code> via git itself.</td></tr>
+    <tr><td>up</td><td><b>The front door.</b> Makes the store exist and be current, whatever the state needs: no config → bootstraps it (monorepos via scan; curate after) and gathers; empty store + declared <code>remote.pull</code> → pull (a failed pull gathers locally and says so); no remote → gather; stale vs git HEAD → fast re-gather (adapters skipped); fresh → no-op. Idempotent.</td></tr>
+    <tr><td>add [&lt;path&gt;] [--force] [--jobs N] [--no-adapters]</td><td>Gather code + markdown + property/manifest files + every adapter (<code>--no-adapters</code> skips the scripts). Incremental: re-add prunes stale nodes; a &gt;50% shrink is refused unless <code>--force</code> (a gutted gather is more likely a broken run than a huge refactor). At a multi-module root it fans out one worker per module and refreshes the navigator. Honors <code>.gitignore</code> via git itself.</td></tr>
     <tr><td>add --json -|FILE</td><td>The universal door: upsert a validated batch of nodes+edges from any adapter/tool. Fail-closed — an invalid batch is rejected whole.</td></tr>
+    <tr><td>sync</td><td>The fast lane: re-gather the repo you're in (code, docs, manifests, git; prunes deleted, refreshes wiki + navigator) but <b>skip adapter scripts</b>. Safe — replacement is producer-scoped, adapter nodes stay put; the report says how many were skipped.</td></tr>
+    <tr><td>adapters list | run [name]</td><td>The slow lane, on demand: list the dropped adapter scripts, or re-run all (or one by name) when the external system changed — schema migrated, topics moved. Running one adapter never disturbs the code graph.</td></tr>
     <tr><td>wiki</td><td>Regenerate the markdown wiki (every <code>add</code> already does).</td></tr>
   </table></div>
 
@@ -213,44 +251,39 @@ ctx-optimize manifests list</pre>
     <tr><th>command</th><th>what it does</th></tr>
     <tr><td>query|ask "terms" [--budget N] [--modules all|a,b] [--root]</td><td>Ranked, cited hits (id, kind, file:line, signature, neighbors). Scope follows cwd: in a module dir it answers from that module and escalates repo-wide on zero hits; at the root it federates across all modules. <code>--budget</code> caps output tokens (default 2000).</td></tr>
     <tr><td>card "X"</td><td>Symbol card: signature, doc, location, callers, callees — cite without opening the file. Accepts id, exact label, or fuzzy name; strips invented qualifiers (<code>ns::Class::Method</code> → <code>Method</code>); a total miss suggests the nearest labels.</td></tr>
+    <tr><td>change-plan "X" [--json]</td><td>The composed "I'm about to change X" answer, one bounded call: signature + callers + blast radius + <b>which tests to run</b> + co-change history, with a confidence footer. ~90% fewer answer tokens than the query+card+affected chain (measured). Alias: <code>plan</code>.</td></tr>
     <tr><td>explain "X"</td><td>Plain-language node + neighborhood.</td></tr>
     <tr><td>affected "X" [--depth N] [--relation R]</td><td>Reverse impact: what breaks if X changes.</td></tr>
     <tr><td>path "A" "B"</td><td>Shortest path between two nodes.</td></tr>
     <tr><td>hubs [--top N]</td><td>Most-connected nodes — where to start reading.</td></tr>
     <tr><td>status</td><td>Store facts + freshness vs git HEAD + tokens-saved tally.</td></tr>
     <tr><td>fresh</td><td>One-line verdict; exit 0 fresh / 1 stale / 2 unknown. The agent/hook gate before trusting an answer.</td></tr>
-    <tr><td>serve|dashboard [--port 4747]</td><td>Local read-only dashboard on 127.0.0.1. Zero external requests.</td></tr>
+    <tr><td>serve|dashboard [--port 4747]</td><td>Local dashboard on 127.0.0.1 — zero external requests; mutations are loopback-only and audited.</td></tr>
   </table></div>
 
   <h3 class="sub">Manage</h3>
   <div class="tablewrap"><table>
     <tr><th>command</th><th>what it does</th></tr>
     <tr><td>config [&lt;key&gt; [&lt;value&gt;]] [--project]</td><td>Get/set settings, git-style two levels: machine-global by default, <code>--project</code> writes the committable repo config. Project overrides global — see <a href="#global-config">settings</a>.</td></tr>
-    <tr><td>remote init &lt;url&gt; [--local]</td><td>Write the remote to the repo config (committable). <code>--local</code> keeps it in this machine's store only.</td></tr>
-    <tr><td>remote push|pull</td><td>Incremental sync with the configured remote. No URL argument — the config file is the single source of truth. Scope follows cwd.</td></tr>
+    <tr><td>remote push|pull</td><td>Run the push/pull <b>commands you declared</b> in <code>.ctxoptimize/config.json</code> — the binary ships no transport of its own. Your command gets <code>CTX_STORE_DIR</code> / <code>CTX_STORE_KEY</code> / <code>CTX_SCOPE_PREFIX</code> / <code>CTX_DIRECTION</code> in env; a non-zero exit fails the verb. No URL argument — the config file is the single source of truth. Scope follows cwd. (<code>remote init</code> was removed in v0.4.)</td></tr>
     <tr><td>merge &lt;module&gt;... --into N</td><td>Combine module stores into one merged view. Always opt-in, never automatic.</td></tr>
     <tr><td>export [--format json|dot|graphml|csv|obsidian|all] [--out F|DIR]</td><td>Dump the graph for other tools.</td></tr>
     <tr><td>languages add|list|remove</td><td>Grammar packs — see <a href="#languages">languages</a>.</td></tr>
     <tr><td>save-result / reflect</td><td>The learning loop — see <a href="#learning">below</a>.</td></tr>
-    <tr><td>install / uninstall --skills</td><td>Agent skill + prompt hooks per platform.</td></tr>
+    <tr><td>install / uninstall</td><td>Agent skill + prompt hooks per platform. Plain <code>uninstall</code> removes everything <code>install</code> wrote; stores and committed repo pointers stay.</td></tr>
+    <tr><td>update [--check]</td><td>Self-update the binary (npm via npm; standalone via GitHub Releases, sha256-verified) then refresh skills + hooks + the global rule. <code>--check</code> reports only. User-invoked network only.</td></tr>
   </table></div>
 </div></section>
 
 <section class="doc" id="repo-config"><div class="wrap">
   <div class="sec-kicker">repo config · committed</div>
   <h2 class="sec"><code>.ctxoptimize/config.json</code> — the only thing we put in your repo.</h2>
-  <p class="sec-sub">Scaffolded by <code>init</code>, owned by you, committed so the whole team's agents inherit it. Every field:</p>
+  <p class="sec-sub">Scaffolded by <code>init</code> — alongside an inert <code>example.js.sample</code> adapter, the git-lane transport samples <code>push.js.sample</code> / <code>pull.js.sample</code>, and <code>remote.example.md</code> — owned by you, committed so the whole team's agents inherit it. Every field:</p>
   <pre class="block">{
   <span class="k">"name"</span>: "my-service",                <span class="c">// store key override (default: repo basename)</span>
-  <span class="k">"remote"</span>: {                           <span class="c">// or a plain string URL</span>
-    <span class="k">"type"</span>: "s3",
-    <span class="k">"url"</span>: "s3://team-bucket/ctx",
-    <span class="k">"credentials"</span>: {
-      <span class="k">"access_key_id"</span>: "${TEAM_KEY_ID}",       <span class="c">// ${VAR} resolves from env at sync time —</span>
-      <span class="k">"secret_access_key"</span>: "${TEAM_SECRET}",   <span class="c">// values are never written or printed</span>
-      <span class="k">"region"</span>: "auto",
-      <span class="k">"endpoint"</span>: "${R2_ENDPOINT}"
-    }
+  <span class="k">"remote"</span>: {                           <span class="c">// YOUR transport — any shell line (js, py, sh, inline)</span>
+    <span class="k">"push"</span>: "node .ctxoptimize/push.js", <span class="c">// run by `remote push`; gets CTX_STORE_DIR,</span>
+    <span class="k">"pull"</span>: "node .ctxoptimize/pull.js"  <span class="c">// CTX_STORE_KEY, CTX_SCOPE_PREFIX, CTX_DIRECTION in env</span>
   },
   <span class="k">"adapters"</span>: [                         <span class="c">// optional explicit list; scripts dropped in</span>
     {<span class="k">"name"</span>: "kafka", <span class="k">"run"</span>: "adapters/kafka.js"}   <span class="c">// adapters/ are auto-discovered anyway</span>
@@ -270,14 +303,14 @@ ctx-optimize manifests list</pre>
   <div class="tablewrap"><table>
     <tr><th>field</th><th>meaning</th></tr>
     <tr><td>name</td><td>Overrides the store folder under <code>~/ctxoptimize/</code>. Use when two repos share a basename or you want a custom key.</td></tr>
-    <tr><td>remote</td><td>Where <code>remote push/pull</code> syncs. A plain string (<code>"s3://…"</code>, <code>"file:///…"</code>) or the object form with credentials. <code>${VAR}</code> placeholders resolve from the environment at sync time; unset variables fail loudly and resolved values are never written anywhere.</td></tr>
+    <tr><td>remote</td><td>The push/pull <b>commands</b> — plain shell lines the binary runs as-is (cwd = repo root, one env contract: <code>CTX_STORE_DIR</code>, <code>CTX_STORE_KEY</code>, <code>CTX_SCOPE_PREFIX</code>, <code>CTX_DIRECTION</code>). The binary ships no transport of its own. A legacy v0.3 URL-shaped value still loads but is inert — <code>push</code>/<code>pull</code> print the migration pointer.</td></tr>
     <tr><td>adapters</td><td>Optional explicit adapter list. Any <code>.js</code>/<code>.mjs</code>/<code>.py</code>/<code>.sh</code> dropped into <code>.ctxoptimize/adapters/</code> is discovered automatically on <code>add</code> and must print one batch JSON to stdout. <code>init</code> seeds an inert <code>example.js.sample</code>.</td></tr>
     <tr><td>modules</td><td>The generated, owned module list of a monorepo root. Written by <code>init --scan</code>, hand-editable, globs allowed. Present ⇒ <code>add</code> fans out and queries resolve scope against it. Two shapes: <code>{"path": "…"}</code> for a single directory, or <b><code>{"name": "X", "paths": ["…", "…"]}</code></b> to gather several <b>scattered</b> folders into ONE store — the .NET / Gradle case where a module's source and tests live in separate top-level dirs (<code>src/Billing</code> + <code>tests/Billing.Tests</code>). Multi-path modules extract in a single pass, so test→source calls resolve <em>across</em> the folder split.</td></tr>
     <tr><td>module_of</td><td>(child configs only) Marks an opt-in config inside a module dir; the value is the root store key. Written automatically when you run <code>init</code> inside a declared module — never a shadow store.</td></tr>
     <tr><td>scan</td><td>Generator tuning: <code>depth</code>, extra <code>markers</code>, <code>include</code>/<code>exclude</code> globs. Built-in markers: go.mod, go.work, package.json, pom.xml, build.gradle(.kts), settings.gradle(.kts), Cargo.toml, pyproject.toml, setup.py.</td></tr>
     <tr><td>instructions · skills · hooks</td><td>Per-project overrides of the <a href="#global-config">machine-global settings</a> — set with <code>config &lt;key&gt; &lt;value&gt; --project</code>, committed so the whole team inherits them. Empty = inherit global.</td></tr>
   </table></div>
-  <div class="note"><b>Secrets rule.</b> Credentials live in the environment and are referenced by <b>name</b> (<code>${VAR}</code>). The binary resolves them only at the moment a sync call needs them; nothing resolved is ever stored, printed, or logged. Files whose names smell like secret stores (<code>secret</code>, <code>credential</code>, <code>password</code>, <code>.env*</code>) are refused by the extractors, and gathers honor your <code>.gitignore</code> via git's own semantics.</div>
+  <div class="note"><b>Secrets rule.</b> Credentials live in the environment and stay env-var <b>names</b> in config and scripts alike — the shell expands them only at the moment your remote command runs; values are never written, printed, or logged. Files whose names smell like secret stores (<code>secret</code>, <code>credential</code>, <code>password</code>, <code>.env*</code>) are refused by the extractors, and gathers honor your <code>.gitignore</code> via git's own semantics.</div>
 </div></section>
 
 <section class="doc" id="global-config"><div class="wrap">
@@ -299,11 +332,12 @@ ctx-optimize config instructions AGENTS --project <span class="c"># pin for THIS
 
 <section class="doc" id="env"><div class="wrap">
   <div class="sec-kicker">environment</div>
-  <h2 class="sec">One variable. That's the whole surface.</h2>
+  <h2 class="sec">One variable in. Four handed to your remote scripts.</h2>
   <div class="tablewrap"><table>
     <tr><th>variable</th><th>meaning</th></tr>
     <tr><td>CTX_OPTIMIZE_STORE</td><td>Store root override (default <code>~/ctxoptimize</code>). Also how tests stay hermetic.</td></tr>
-    <tr><td>${VAR} in remote credentials</td><td>Any variable your repo config references by name — resolved at sync time only, never persisted.</td></tr>
+    <tr><td>CTX_STORE_DIR · CTX_STORE_KEY · CTX_SCOPE_PREFIX · CTX_DIRECTION</td><td>Set <b>by the binary</b> in the environment of your declared <code>remote push/pull</code> command: the local store tree (pull pre-creates it), the store key, the module scope, and <code>push</code>/<code>pull</code> — so one script can serve both directions.</td></tr>
+    <tr><td>$VAR in your scripts</td><td>Your own secrets stay env-var names — the shell expands them when your command runs; nothing is ever persisted or printed.</td></tr>
   </table></div>
 </div></section>
 
@@ -323,24 +357,37 @@ ctx-optimize config instructions AGENTS --project <span class="c"># pin for THIS
 
 <section class="doc" id="remotes"><div class="wrap">
   <div class="sec-kicker">remotes &amp; sharing</div>
-  <h2 class="sec">Push the graph, not the gather time.</h2>
-  <pre class="block"><span class="c"># once, committed — the whole team inherits it</span>
-ctx-optimize remote init s3://team-bucket/ctx
-git add .ctxoptimize &amp;&amp; git commit -m "share the knowledge store"
+  <h2 class="sec">Push the graph, not the gather time. The remote is your script.</h2>
+  <p class="sec-sub">The binary never moves bytes to a host it chose. <code>remote push</code> / <code>remote pull</code> run the commands <b>you</b> declare in the committed config — any shell line (js, py, sh, or inline). Same trust model as adapters and npm scripts.</p>
+  <pre class="block"><span class="c"># .ctxoptimize/config.json — committed, the whole team inherits it</span>
+{
+  <span class="k">"remote"</span>: {
+    <span class="k">"push"</span>: "node .ctxoptimize/push.js",
+    <span class="k">"pull"</span>: "node .ctxoptimize/pull.js"
+  }
+}
 
-<span class="c"># teammate, fresh clone: `init` sees the committed remote and</span>
-<span class="c"># FETCHES the prebuilt graph itself — no rebuild from source</span>
-ctx-optimize init            <span class="c"># auto-pulls; or `remote pull` directly</span>
+<span class="c"># arm the scaffolded zero-dependency GIT LANE (a private repo hosts every store —</span>
+<span class="c"># artifacts are sorted ndjson, so git diffs and merges them cleanly)</span>
+gh repo create your-org/ctx-stores --private        <span class="c"># once per team</span>
+mv .ctxoptimize/push.js.sample .ctxoptimize/push.js
+mv .ctxoptimize/pull.js.sample .ctxoptimize/pull.js
+<span class="c"># set STORE_REPO_URL in both, add the "remote" block to config.json, commit</span>
+ctx-optimize remote push
+
+<span class="c"># teammate, fresh clone — ONE command, done</span>
+ctx-optimize up              <span class="c"># runs the declared pull; falls back to a local gather, loudly</span>
 
 <span class="c"># after you gather new work</span>
 ctx-optimize add . &amp;&amp; ctx-optimize remote push</pre>
-  <p class="body">Two schemes: <b><code>s3://</code></b> (AWS, R2, MinIO — any S3-compatible endpoint; SigV4 in the stdlib, no SDK) and <b><code>file://</code></b> (shared drives). Sync is incremental by content hash and <b>scope-aware</b>: push from a monorepo root syncs the whole store tree, from a module dir only that module's prefix. Vocabulary: <b>sync</b> = keep the graph matching the code (<code>add .</code>, <code>fresh</code>); <b>share</b> = <code>remote push/pull</code>.</p>
+  <p class="body">Your command gets the store context in env — <code>CTX_STORE_DIR</code> (pull pre-creates it), <code>CTX_STORE_KEY</code>, <code>CTX_SCOPE_PREFIX</code> (module scope: push from a monorepo root shares the whole tree, from a module dir only that module's prefix), <code>CTX_DIRECTION</code> — and a non-zero exit fails the verb. S3/R2/MinIO is a small aws-CLI script over the same contract; GCS, Artifactory, rsync-over-ssh, anything — write the script that copies <code>CTX_STORE_DIR</code> to and from your host and declare it. Recipes live in the scaffolded <code>.ctxoptimize/remote.example.md</code>. Secrets stay env-var names, expanded by the shell at run time — never in config or scripts, never printed. Vocabulary: <b>sync</b> = keep the graph matching the code (<code>up</code>, <code>sync</code>, <code>add .</code>, <code>fresh</code>); <b>share</b> = <code>remote push/pull</code>.</p>
+  <div class="note warn"><b>Upgrading from v0.3:</b> <code>remote init</code> and the built-in <code>file://</code>/<code>s3://</code> transports are gone. A legacy URL-shaped config still loads but is inert — <code>push</code>/<code>pull</code> print the migration pointer.</div>
 </div></section>
 
 <section class="doc" id="adapters"><div class="wrap">
   <div class="sec-kicker">adapters</div>
   <h2 class="sec">Anything becomes nodes: databases, topics, logs, documents.</h2>
-  <p class="sec-sub">The binary never grows drivers. An adapter is any script in <code>.ctxoptimize/adapters/</code> (<code>.js</code>/<code>.mjs</code> → node, <code>.py</code> → python3, <code>.sh</code> → sh) that prints one batch to stdout. It runs on every <code>add</code>; an invalid batch is rejected whole.</p>
+  <p class="sec-sub">The binary never grows drivers. An adapter is any script in <code>.ctxoptimize/adapters/</code> (<code>.js</code>/<code>.mjs</code> → node, <code>.py</code> → python3, <code>.sh</code> → sh) that prints one batch to stdout. It runs on every <code>add</code>; an invalid batch is rejected whole. Adapters can be arbitrarily slow (DB dumps, doc converters), so they get their own lanes: <code>sync</code> re-gathers the repo and <b>skips</b> them, <code>adapters run [name]</code> re-runs all or one on demand, <code>add --no-adapters</code> is the fast lane spelled long.</p>
   <pre class="block">{
   <span class="k">"producer"</span>: "kafka",
   <span class="k">"nodes"</span>: [
@@ -398,7 +445,7 @@ ctx-optimize reflect</pre>
 <section class="doc" id="contract"><div class="wrap">
   <div class="sec-kicker">the contract</div>
   <h2 class="sec">What the binary will never do.</h2>
-  <p class="body">No LLM calls. No database drivers. No embeddings. No MCP server. No network — except the remote <b>you</b> configured. No telemetry. The host agent is the only intelligence; the binary is deterministic and its artifacts are plain, sorted, git-diffable files. Full reasoning: <a href="https://github.com/muthuishere/ctx-optimize/blob/main/docs/VISION.md">VISION.md</a> and the standing counter-weight <a href="https://github.com/muthuishere/ctx-optimize/blob/main/docs/CRITIQUE.md">CRITIQUE.md</a>.</p>
+  <p class="body">No LLM calls. No database drivers. No embeddings. No MCP server. No network — except when <b>you</b> ask: <code>update</code> (npm / GitHub Releases, sha256-verified), <code>languages add</code>'s one-time zig fetch, and whatever your own remote scripts do. No telemetry. The host agent is the only intelligence; the binary is deterministic and its artifacts are plain, sorted, git-diffable files. Full reasoning: <a href="https://github.com/muthuishere/ctx-optimize/blob/main/docs/VISION.md">VISION.md</a> and the standing counter-weight <a href="https://github.com/muthuishere/ctx-optimize/blob/main/docs/CRITIQUE.md">CRITIQUE.md</a>.</p>
 </div></section>
 
 <footer><div class="wrap">

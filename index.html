@@ -223,7 +223,7 @@ hr.sep{border:none;border-top:1px solid var(--border);max-width:1080px;margin:0 
   </div>
   <pre class="reveal herocmd"><span class="g">npm install -g @muthuishere/ctx-optimize</span>
 ctx-optimize install --skills            <span class="c"># one-time: teach your agent (global)</span>
-cd your-repo &amp;&amp; ctx-optimize init &amp;&amp; ctx-optimize add .   <span class="c"># gather it — then ask anything</span></pre>
+cd your-repo &amp;&amp; <span class="g">ctx-optimize up</span>          <span class="c"># one verb: bootstrap, gather, or pull — then ask anything</span></pre>
 </div></header>
 
 <section class="herodemo" id="watch" style="padding:80px 0 20px"><div class="wrap">
@@ -239,15 +239,17 @@ cd your-repo &amp;&amp; ctx-optimize init &amp;&amp; ctx-optimize add .   <span 
   <h2 class="sec">Three commands to a smarter agent.</h2>
   <pre class="reveal"><span class="g">npm install -g @muthuishere/ctx-optimize</span>   <span class="c"># one static binary per platform, no postinstall downloads</span>
 ctx-optimize install --skills               <span class="c"># one-time: teach your coding agent to answer from the store</span>
-cd your-repo && ctx-optimize init && ctx-optimize add .   <span class="c"># gather this repo — about a second</span></pre>
-  <p class="sec-sub" style="margin-top:16px">Monorepo? One more command finds every project first:</p>
+cd your-repo && <span class="g">ctx-optimize up</span>             <span class="c"># bare repo → bootstraps config + gathers (about a second);</span>
+                                            <span class="c"># monorepo → scan-bootstraps one store per module + a navigator;</span>
+                                            <span class="c"># clone with a shared store declared → pulls it; stale → refresh</span></pre>
+  <p class="sec-sub" style="margin-top:16px">Want control instead of <code>up</code>'s defaults — review a monorepo's module list before gathering, pick pointer targets? That's <code>init</code>:</p>
   <pre class="reveal" style="margin-top:12px"><span class="g">ctx-optimize scan</span>                           <span class="c"># lists every project it found (read-only)</span>
-ctx-optimize init --scan --yes && ctx-optimize add .   <span class="c"># one store per module + a navigator</span></pre>
+ctx-optimize init --scan --yes && ctx-optimize add .   <span class="c"># curate config.json, then gather explicitly</span></pre>
   <p class="sec-sub" style="margin-top:16px">Source and tests in <b>separate folders</b> (the .NET / Gradle case)? Declare one module across both — they share a graph, and test→source calls resolve across the split:</p>
   <pre class="reveal" style="margin-top:12px"><span class="c"># .ctxoptimize/config.json</span>
 "modules": [{ <span class="g">"name"</span>: "Billing", <span class="g">"paths"</span>: [<span class="g">"src/Billing"</span>, <span class="g">"tests/Billing.Tests"</span>] }]</pre>
-  <p class="sec-sub" style="margin-top:16px">A teammate cloning your repo runs <b>one</b> command — <code>init</code> reads the committed remote and fetches your prebuilt graph instead of rebuilding.</p>
-  <p class="sec-sub" style="margin-top:18px">v0.3.5 · macOS / Linux / Windows · works with Claude Code, Codex, Copilot &amp; Devin · framework <a href="docs.html#v03">routes, build-tool dependencies, k8s topology, subsystems, multi-path modules &amp; a first-class dashboard</a> · <a href="https://github.com/muthuishere/ctx-optimize">source on GitHub</a>.</p>
+  <p class="sec-sub" style="margin-top:16px">A teammate cloning your repo runs the same <b>one</b> command — <code>ctx-optimize up</code> — which does whatever the state needs: pulls the team's prebuilt store when the committed config declares a pull, gathers locally otherwise, fast-refreshes a stale store, no-ops on a fresh one. Idempotent — run it whenever.</p>
+  <p class="sec-sub" style="margin-top:18px">macOS / Linux / Windows · works with Claude Code, Codex, Copilot &amp; Devin · framework <a href="docs.html#v03">routes, build-tool dependencies, k8s topology, subsystems, multi-path modules &amp; a first-class dashboard</a> · <a href="docs.html#v04">scripted sharing, one-verb onboarding &amp; change-plan</a> · <a href="https://github.com/muthuishere/ctx-optimize">source on GitHub</a>.</p>
 </div></section>
 
 <section class="herodemo" id="agent" style="padding:70px 0"><div class="wrap">
@@ -312,7 +314,7 @@ ctx-optimize init --scan --yes && ctx-optimize add .   <span class="c"># one sto
 <section class="herodemo" id="demo"><div class="wrap">
   <div class="sec-kicker">the demo that matters</div>
   <h2 class="sec">A symbol card answers what used to take four file reads.</h2>
-  <p class="sec-sub">Signature, doc comment, location, callers, callees — in one shot, from the graph. This is the read your agent no longer makes.</p>
+  <p class="sec-sub">Signature, doc comment, location, callers, callees — in one shot, from the graph. This is the read your agent no longer makes. About to <em>edit</em>? <code>change-plan X</code> goes further: one composed answer with the signature, the callers, the blast radius, and <b>which tests to run</b> — measured ~90% fewer answer tokens than the query+card+affected chain it replaces.</p>
   <video src="media/card.mp4" autoplay loop muted playsinline class="reveal"></video>
   <p class="cap">Unedited recording · <code>ctx-optimize card "Store.Merge"</code> on this project's own source</p>
 </div></section>
@@ -579,8 +581,8 @@ ctx-optimize init --scan --yes && ctx-optimize add .   <span class="c"># one sto
         <li><span class="m">✓</span><span><b>tree-sitter → WASM</b>, hosted by wazero — pure Go, CGO_ENABLED=0</span></li>
         <li><span class="m">✓</span><span><b>one committable <code>.ctxoptimize/</code></b> per repo: config + drop-in adapter scripts</span></li>
         <li><span class="m">✓</span><span><b>central store</b> at <code>~/ctxoptimize/&lt;repo&gt;/</code> — multi-module, git-diffable NDJSON</span></li>
-        <li><span class="m">✓</span><span><b>team sync without a server</b> — push/pull to any S3-compatible bucket, credentials as <code>${VAR}</code> names, values never written</span></li>
-        <li><span class="m">✓</span><span>query · card · explain · path · affected · hubs · wiki · export · serve</span></li>
+        <li><span class="m">✓</span><span><b>team sync is your script</b> — <code>remote push/pull</code> run commands you declare in the committed config (a git repo, any bucket, anything); secrets stay env-var names</span></li>
+        <li><span class="m">✓</span><span>query · card · change-plan · explain · path · affected · hubs · wiki · export · serve · up</span></li>
       </ul>
     </div>
     <div class="pane was out reveal" style="background:var(--bg2)">
@@ -606,7 +608,7 @@ ctx-optimize init --scan --yes && ctx-optimize add .   <span class="c"># one sto
     <div class="method" style="margin:0"><b>One binary — no store to run.</b> CGO-free Go, tree-sitter compiled to WASM. Nothing to stand up: no SQLite file, no LadybugDB, no Neo4j service, no Python venv, no language server per language. <code>npm i -g</code> and it runs, offline.</div>
     <div class="method" style="margin:0"><b>Deterministic — no model, ever.</b> CodeGraph and GitNexus are structural like us; graphify reaches for an LLM to label communities and potpie keeps one in the loop. We hand all semantics to the agent you already run — zero API keys, reproducible every time.</div>
     <div class="method" style="margin:0"><b>Extensible without a fork.</b> A new language is a drop-in grammar pack; a framework's routes, a build tool's deps, Postgres, Kafka, logs — drop-in route/manifest packs and adapter scripts through one validated door. No other tool here lets you add a recognizer as a committed JSON file.</div>
-    <div class="method" style="margin:0"><b>More than code, in one graph.</b> Routes→handlers, dependencies that federate across build tools, k8s topology, git co-change, subsystems. Serena has no persistent graph; the graph-DB tools mostly stop at code. And team sync is push/pull to any S3 bucket — no server.</div>
+    <div class="method" style="margin:0"><b>More than code, in one graph.</b> Routes→handlers, dependencies that federate across build tools, k8s topology, git co-change, subsystems. Serena has no persistent graph; the graph-DB tools mostly stop at code. And team sync is a script you declare — push/pull to a git repo or any bucket, no server, no built-in transport to trust.</div>
   </div>
   <p class="sec-sub" style="margin-top:28px">The full board — where every rival wins and where we lose, with numbers — is on <a href="compare.html">the honest comparison</a>.</p>
 </div></section>
@@ -618,7 +620,7 @@ ctx-optimize init --scan --yes && ctx-optimize add .   <span class="c"># one sto
   <h2 class="sec">Convinced? It's still three commands.</h2>
   <pre class="reveal"><span class="g">npm install -g @muthuishere/ctx-optimize</span>
 ctx-optimize install --skills   <span class="c"># one-time: teaches your coding agent to use the store</span>
-cd your-repo && ctx-optimize init && ctx-optimize add .</pre>
+cd your-repo && <span class="g">ctx-optimize up</span></pre>
   <p class="sec-sub" style="margin-top:22px">Every command and every config key — repo config, machine-global config, monorepos, remotes, adapters, route/manifest/grammar packs — on one page: <a href="docs.html">the docs</a>. See where we stand against the field, honestly: <a href="compare.html">the comparison</a>.</p>
 </div></section>
 
