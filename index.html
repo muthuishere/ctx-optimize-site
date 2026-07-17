@@ -571,6 +571,37 @@ ctx-optimize init --scan --yes && ctx-optimize add .   <span class="c"># curate 
 
 <hr class="sep">
 
+<section class="numbers" id="ladder"><div class="wrap">
+  <div class="sec-kicker">the model ladder</div>
+  <h2 class="sec">One store. Every model class. Judged blind.</h2>
+  <p class="sec-sub">Same prebuilt store (linux kernel, ~274k nodes), same 8 block-layer questions, one fresh agent session per model — answers graded against withheld golden keys the product already pins in CI. Measured 2026-07-17 · <a href="https://github.com/muthuishere/ctx-optimize/tree/main/benchmarks/agent-model-bench">questions, keys &amp; raw transcripts</a>.</p>
+
+  <div class="tablewrap reveal" style="margin-top:26px">
+  <table>
+    <tr><th>model · harness</th><th>score /80</th><th>avg s/question</th><th>tool calls (8 q)</th><th>notes</th></tr>
+    <tr><td>Fable 5 · Claude Code</td><td class="win"><b>80</b></td><td>24.6</td><td>23</td><td>every key + full mechanism chains</td></tr>
+    <tr><td>Sonnet 5 · Claude Code</td><td class="win"><b>80</b></td><td>17.5</td><td>25</td><td>every key; fastest frontier-quality run</td></tr>
+    <tr><td>Opus 4.8 · Claude Code</td><td><b>79</b></td><td>19.0</td><td>22</td><td>one canonical symbol described but not named</td></tr>
+    <tr><td>Haiku 4.5 · Claude Code</td><td><b>72</b></td><td>13.6</td><td>18</td><td>90% of frontier quality at half the wall time</td></tr>
+    <tr><td>gpt-4o-mini · toolnexus, one-shot</td><td><b>54</b></td><td>9.4</td><td>24</td><td>$0.015 for all 8 — protocol pinned from the committed <code>.ctxoptimize/instructions.md</code> card</td></tr>
+  </table>
+  </div>
+
+  <div class="reveal" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(258px,1fr));gap:16px;margin-top:26px">
+    <div class="method" style="margin:0">
+      <b>The store is model-portable.</b> Sonnet matches Fable exactly at 1.4× the speed. Haiku — the cheapest Claude tier — lands 90% of frontier quality with just 18 tool calls. Agent discipline + the store beats raw model size: Haiku (72) outscored gpt-4o-mini (54) on identical questions.
+    </div>
+    <div class="method" style="margin:0">
+      <b>Small models need the protocol pinned.</b> A short mandatory system prompt — query first, answer only from output, cite file:line, say "not found" after two empty queries — ships in the usage card every store commits at <code>.ctxoptimize/instructions.md</code>. With it, a $0.15/M-token model reaches ~70% of frontier quality at ~1/100th the cost. One-shot per question beats a continuous conversation: same score, 7× cheaper, no cross-question bleed.
+    </div>
+    <div class="method" style="margin:0">
+      <b>What frontier still buys.</b> Canonical-symbol precision, query re-crafting when the first hit is noise, and honest abstention — on a trick question with no real answer, gpt-4o-mini fabricated a module even under protocol; every Claude tier declined to.
+    </div>
+  </div>
+</div></section>
+
+<hr class="sep">
+
 <section class="contract"><div class="wrap">
   <div class="sec-kicker">the design contract</div>
   <h2 class="sec">What's in the binary — and what never will be.</h2>
